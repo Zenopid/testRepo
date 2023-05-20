@@ -1124,6 +1124,19 @@ public class Primary {
         System.out.println("2: Explore");
         System.out.println("3: Skill Tree");
         System.out.println("4: Change Loadout");
+        System.out.println("5: Settings");
+
+    }
+
+    static void settings() throws InterruptedException {
+        System.out.println("1: Volume");
+        System.out.println("there's litteraly nothing else to change except volume lol");
+        playerResponse();
+        if (answer == 1) {
+            System.out.println("Type desired volume.");
+            playerResponse();
+
+        }
     }
 
     static void playerDied() throws InterruptedException {
