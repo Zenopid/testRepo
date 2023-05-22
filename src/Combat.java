@@ -439,7 +439,7 @@ public class Combat extends Primary {
                     playerIsAttacking = true;
                     hasConfirmedAtk = true;
                     hasConfirmedCombat = true;
-            playerStamina -= staminaCost;
+                    playerStamina -= staminaCost;
                 } else {
                     hasConfirmedAtk = true;
                 }
@@ -649,7 +649,7 @@ public class Combat extends Primary {
                     playerIsAttacking = true;
                     hasConfirmedAtk = true;
                     hasConfirmedCombat = true;
-            playerStamina -= staminaCost;
+                    playerStamina -= staminaCost;
                 } else {
                     hasConfirmedAtk = true;
                 }
