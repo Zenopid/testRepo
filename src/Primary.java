@@ -347,10 +347,10 @@ public class Primary {
                     playerPosChecker();
                 } else if (answer == 3) skillTree();
                 else if (answer == 4) playerLoadout();
-                else if (answer >= 5 && onShop) {
+                else if (answer == 5 && onShop) {
                     if (inWildlands) basicShop();
                     if (inMountains) advancedShop();
-                } else if (answer >= 5 && onDungeon) Dungeon.undergroundExplore();
+                } else if (answer == 5 && onDungeon) Dungeon.undergroundExplore();
             }
             playerPosChecker();
             for (int m = 0; m < enemyPosX.length; m++) {
@@ -364,10 +364,9 @@ public class Primary {
                     rngValmin = 1;
                     rngValmax = 2;
                     genericRNG();
-                     playMusic(rngVal);
+                    tempVal3 = rngVal;
+                    playMusic(rngVal);
                     Combat.fight();
-                    stopMusic();
-                    resetMusic();
                 }
             }
             endOfDay();
@@ -1127,18 +1126,6 @@ public class Primary {
         System.out.println("5: Settings");
 
     }
-
-    static void settings() throws InterruptedException {
-        System.out.println("1: Volume");
-        System.out.println("there's litteraly nothing else to change except volume lol");
-        playerResponse();
-        if (answer == 1) {
-            System.out.println("Type desired volume.");
-            playerResponse();
-
-        }
-    }
-
     static void playerDied() throws InterruptedException {
         System.out.println("You lost. The hours turn into days as you regain your strength...");
         day += 10;
@@ -1887,7 +1874,8 @@ public class Primary {
         System.out.println("Block sfx: Sound Effect by <a href=\"https://pixabay.com/users/sectionsound-34536612/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=143940\">SectionSound</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=143940\">Pixabay</a>");
         System.out.println("Ki Charge: https://www.youtube.com/watch?v=VoYzS_E7Ijg&ab_channel=DavidDumaisAudio");
     }
-    protected  static void playMusic(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    protected  static void playMusic(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException, InterruptedException {
+        if (musicPlaying) stopMusic();
         Music.setFile(trackNum);
         Music.startClip();
         Music.loopClip();

@@ -114,6 +114,7 @@ public class Combat extends Primary {
             if (fightRange > 8) fightRange = 8;
             if (playerHP <= 0 || enemyHP <= 0) {
                 combatRecap();
+                Primary.stopMusic();
                 break;
             }
         }
@@ -145,11 +146,11 @@ public class Combat extends Primary {
           if (enemyName.contains("Weak Shields-man")) {
               enemyHP = 135;
               rngValmin = 55;
-              rngValmax = (day * level);
+              rngValmax = (day * level) + 15;
               genericRNG(); // This is for dmg
               enemyDamage = rngVal;
               rngValmin = 80;
-              rngValmax = (day * level);
+              rngValmax = (day * level) + 20;
               genericRNG(); // This is for speed
               enemySpeed = rngVal;
               rngValmin = 100;
@@ -158,8 +159,8 @@ public class Combat extends Primary {
           }
           if (enemyName.contains("Weak Swords-man")) {
               enemyHP = 100;
-              rngValmin = 90;
-              rngValmax = (day * level);
+              rngValmin = 85;
+              rngValmax = (day * level) + 30;
               genericRNG(); // This is for dmg
               enemyDamage = rngVal;
               genericRNG(); // This is for speed
@@ -402,7 +403,6 @@ public class Combat extends Primary {
                 System.out.println("Cost: " + staminaCost + " Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.75)));
                 System.out.println("Damage: Medium");
-
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -416,7 +416,6 @@ public class Combat extends Primary {
                     hasConfirmedCombat = true;
                     playerStamina -= staminaCost;
                 } else {
-
                     hasConfirmedAtk = true;
                 }
             } else if (tempMove.contains("Downward Slice")) {
@@ -430,7 +429,6 @@ public class Combat extends Primary {
                 System.out.println("Cost: " + staminaCost + " Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.7)));
                 System.out.println("Damage: Medium+");
-System.out.println("Cost: " + staminaCost + " Stamina");
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
                 if (answer == 1) {
@@ -443,7 +441,6 @@ System.out.println("Cost: " + staminaCost + " Stamina");
                     hasConfirmedCombat = true;
             playerStamina -= staminaCost;
                 } else {
-
                     hasConfirmedAtk = true;
                 }
             } else if (tempMove.contains("Pommel")) {
@@ -475,10 +472,9 @@ System.out.println("Cost: " + staminaCost + " Stamina");
             } else if (tempMove.contains("Shove")) {
                 System.out.println("Pushes the enemy backwards and creates some space.");
                 System.out.println("Range:1");
-                System.out.println("Cost 0 Stamina");
+                System.out.println("Cost: 0 Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 1.2)));
                 System.out.println("Damage: Medium");
-                    System.out.println("Cost: " + staminaCost + " Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -684,7 +680,7 @@ System.out.println("Cost: " + staminaCost + " Stamina");
          Deflect
          Shield Toss
          */
-        if (!hasShield) System.out.println("You don't have your shield...");
+        if (!hasShield) System.out.println("You don't have your shield.");
         playerIsBlocking = false;
         hasConfirmedAtk = false;
         while (!hasConfirmedAtk) {
@@ -1422,7 +1418,7 @@ System.out.println("Cost: " + staminaCost + " Stamina");
                         enemyIsAttacking = true;
                         enemymoveName = "Whirlwind";
                         enemymoveRange = 3;
-                        enemymoveSpeed = (enemySpeed * 0.3);
+                        enemymoveSpeed = (enemySpeed * 0.4);
                         enemymoveDamage = (enemyDamage * 1.1) * (100 / (100 + attackDefense));
                         enemyConfirm = true;
                     }
@@ -1470,13 +1466,13 @@ System.out.println("Cost: " + staminaCost + " Stamina");
                         enemyConfirm = true;
                     }
                 } else if (rngbaddie == 2) {
-                    if (enemyStamina >= 65) {
-                        enemyStamina -= 65;
+                    if (enemyStamina >= 45) {
+                        enemyStamina -= 45;
                         enemyStaminaDamage = 65;
                         enemyIsAttacking = true;
                         enemymoveName = "Whirlwind";
                         enemymoveRange = 3;
-                        enemymoveSpeed = (enemySpeed * 0.3);
+                        enemymoveSpeed = (enemySpeed * 0.4);
                         enemymoveDamage = (enemyDamage * 1.1) * (100 / (100 + attackDefense));
                         enemyConfirm = true;
                     }
