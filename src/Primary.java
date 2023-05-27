@@ -988,14 +988,9 @@ public class Primary {
                 skillPoints -= cost;
                 System.out.println("You have unlocked " + answerType);
                 answer = 0;
-            } else if (answerType.contains("2")) {
-                System.out.println("You do not have the previous move, so you cannot get this.");
-            }
-        } else if (skillPoints < cost) {
-            System.out.println("Not enough points.");
-        } else {
-            System.out.println("You did not confirm.");
-        }
+            } else System.out.println("You do not have the previous move, so you cannot get this.");
+        } else if (skillPoints < cost) System.out.println("Not enough points.");
+        else System.out.println("You did not confirm.");
     }
 
     static void playerLoadout() throws InterruptedException {
@@ -1116,12 +1111,12 @@ public class Primary {
              */
     }
 
-    static void clearConsole() throws InterruptedException {
+    static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
-    static void dayLoop() throws InterruptedException {
+    static void dayLoop() {
         System.out.println("Number of enemies: " + numofenemy);
         playerPower = (playerHP + weapondmg + playerDefense + playerSpeed) / 4;
         System.out.println("Your hp: " + Math.round(playerHP));
@@ -1140,8 +1135,8 @@ public class Primary {
         System.out.println("3: Skill Tree");
         System.out.println("4: Change Loadout");
     }
-    static void playerDied() throws InterruptedException {
-        System.out.println("You lost. The hours turn into days as you regain your strength...");
+    static void playerDied() {
+        System.out.println("You were knocked out. The hours turn into days as you regain your strength...");
         day += 10;
         playerexp += 15;
         playerHP = 200 + (level*50);
@@ -1228,9 +1223,8 @@ public class Primary {
                         }
                     }
 
-                } case 3 -> {
-                    System.out.println("Duststorm: Prevents you from seeing combat distance.");
-                } case 4 -> {
+                } case 3 -> System.out.println("Duststorm: Prevents you from seeing combat distance.");
+                case 4 -> {
                     System.out.println("Temporal wind: Blows you into the future if touched.");
                     int[] temporalWindPosX = new int[3];
                     int[] temporalWindPosY = new int[3];
