@@ -2,9 +2,23 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 
-public class Combat extends Primary {
+ class Combat extends Music {
 
-    protected static int staminaRegenPaused = 0;
+     //static combatUI CombatUI = new combatUI();
+
+
+     private static Music music;
+
+     public Combat(Music Music) {
+         music = Music;
+     }
+
+    // public Combat() {
+     //     CombatUI = new combatUI();
+    // }
+     protected static double enemyMaxHP;
+
+     protected static int staminaRegenPaused = 0;
     protected static int eradicateTurns = 0;
     protected static boolean isIgnited = false;
     protected static int shieldLocation = 0;
@@ -54,14 +68,19 @@ public class Combat extends Primary {
     //For grab type moves
     protected static boolean ignoresBlock = false;
 
+     public static void fight() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
 
-
-    public static void fight() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-        if (moveSet.containsValue("Swap")) shieldHand = "D";
+         if (moveSet.containsValue("Swap")) shieldHand = "D";
         else shieldHand = "";
+        rngValmin = 1;
+        rngValmax = 2;
+        genericRNG();
+        combatMusic(rngVal);
         playerDamage = weapondmg;
         attackSpeed = playerSpeed;
         attackDefense = playerDefense;
+        clearConsole();
+        decayImp -= 5;
         enemyTypeSelector();
         startCombat();
         while (isFighting) {
@@ -73,14 +92,25 @@ public class Combat extends Primary {
                 if (playerIsActionable) {
                     turnLoop();
                     playerResponse();
-                    if (answer == 1) {
-                        if (weaponName.contains("Axe")) axeSelection();
-                        if (weaponName.contains("Sword")) swordSelection();
-                        if (weaponName.contains("Shield")) shieldSelection();
-                    } else if (answer == 2) playerMove();
-                    else if (answer == 3) playerBlock();
-                    else if (answer == 4) utilityItem();
-                    else if (answer >= 5) playerWait();
+                    switch (answer) {
+                        case 1:
+                            if (weaponName.contains("Axe")) axeSelection();
+                            if (weaponName.contains("Sword")) swordSelection();
+                            if (weaponName.contains("Shield")) shieldSelection();
+                            break;
+                        case 2:
+                        playerMove();
+                        break;
+                        case 3:
+                        playerBlock();
+                        break;
+                        case 4:
+                        utilityItem();
+                        break;
+                        default:
+                        playerWait();
+                        break;
+                    }
                 }
                 else {
                     hasConfirmedCombat = true;
@@ -88,13 +118,16 @@ public class Combat extends Primary {
             }
             tempVal = enemyStamina;
             if (enemyIsActionable) {
-                 if (enemyName.contains("Sword")) SwordsmanAI();
-                 if (enemyName.contains("Shields")) shieldsmanAI();
-                 if (enemyName.contains("Bow")) strongbowmanAI();
-                 if (enemyName.contains("Bear")) bearAI();
-              //  if (enemyName.equals("The Last")) BossAI();
+                switch (enemyName) {
+                    case "Weak Swords-man", "Strong Swords-man" -> SwordsmanAI();
+                    case "Strong Shields-man", "Weak Shields-man" -> shieldsmanAI();
+                    case "Strong Bowman" -> bowmanAI();
+                    case "Bear" -> bearAI(); 
+                    case "The Last" -> BossAI();
+                    //  if (enemyName.equals("The Last")) BossAI();
+                }
                 if (fightRange < 0) fightRange = 0;
-                if (fightRange > 8) fightRange = 8;
+                else if (fightRange > 8) fightRange = 8;
             }
             else
             {
@@ -114,141 +147,162 @@ public class Combat extends Primary {
             if (fightRange > 8) fightRange = 8;
             if (playerHP <= 0 || enemyHP <= 0) {
                 combatRecap();
-                Primary.stopMusic();
-                break;
+                combatStopMusic();
+                isFighting = false;
             }
         }
-
+        combatStopMusic();
     }
     static void startCombat() throws InterruptedException {
-        if (enemyName.contains("Weak Swords-man")) System.out.println("A weak swordsman attacks you!");
-        if (enemyName.contains("Strong Swords-man")) System.out.println("An experienced swordsman forces you into a duel...");
-        if (enemyName.contains("Weak Shields-man")) System.out.println("A weak shieldsman attacks you!");
-        if (enemyName.contains("Strong Shields-man")) System.out.println("An experienced shieldsman forces you into a duel...");
-        if (enemyName.contains("Strong Bowman")) System.out.println("You get the strange feeling someone is aiming at you...");
-        if (enemyName.contains("Bear")) System.out.println("A deep growl sends shivers down your spine...");
-        Thread.sleep(1000);
-        System.out.println("Your power: " + Math.round(playerPower));
-        System.out.println("Enemy power: " + Math.round(enemyPower));
-        Thread.sleep(250);
-        System.out.println("BEGINNING COMBAT");
-        System.out.println("-----------------------------------------------------------");
+        switch (enemyName) {
+            case "Weak Swords-man" -> System.out.println("A weak swordsman attacks you!");
+            case "Strong Swords-man" -> System.out.println("An experienced swordsman forces you into a duel...");
+            case "Weak Shields-man" -> System.out.println("A weak shieldsman attacks you!");
+            case "Strong Shields-man" -> System.out.println("An experienced shieldsman forces you into a duel...");
+            case "Strong Bowman" -> System.out.println("You get the strange feeling someone is aiming at you...");
+            case "Bear" -> System.out.println("A deep growl sends shivers down your spine...");
+            default -> {
+                System.out.println("The smell of smoke surrounds you...");
+                Thread.sleep(1000);
+                System.out.println("Your power: " + Math.round(playerPower));
+                System.out.println("Enemy power: " + Math.round(enemyPower));
+                Thread.sleep(250);
+                System.out.println("BEGINNING COMBAT");
+                System.out.println("-----------------------------------------------------------");
+            }
+        }
     }
 
     static void enemyTypeSelector() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-      if (inWildlands) {
-          rngValmin = 1;
-          rngValmax = 2;
-          genericRNG();
-          if (rngVal == 1) enemyName = "Weak Shields-man";
-          else enemyName = "Weak Swords-man";
-      }
-          if (enemyName.contains("Weak Shields-man")) {
-              enemyHP = 135;
-              rngValmin = 55;
-              rngValmax = (day * level) + 15;
-              genericRNG(); // This is for dmg
-              enemyDamage = rngVal;
-              rngValmin = 80;
-              rngValmax = (day * level) + 20;
-              genericRNG(); // This is for speed
-              enemySpeed = rngVal;
-              rngValmin = 100;
-              genericRNG(); // This is for defense
-              enemyDefense = rngVal;
-          }
-          if (enemyName.contains("Weak Swords-man")) {
-              enemyHP = 100;
-              rngValmin = 85;
-              rngValmax = (day * level) + 30;
-              genericRNG(); // This is for dmg
-              enemyDamage = rngVal;
-              genericRNG(); // This is for speed
-              enemySpeed = rngVal;
-              rngValmin = 60;
-              genericRNG(); // This is for defense
-              enemyDefense = rngVal;
-          } else if (inMountains) {
-              rngValmin = 1;
-              rngValmax = 7;
-              genericRNG();
-              if (rngVal == 2) enemyName = "Bear";
-              else if (rngVal == 4 || rngVal == 5) enemyName = "Strong Bowman";
-              else if (rngVal == 6) enemyName = "Strong Shields-man";
-              else enemyName = "Strong Swords-man";
-              if (enemyName.contains("Strong Swords-man")) {
-                  enemyHP = 150;
-                  rngValmin = 145;
-                  rngValmax = (int) ((day * level) * 1.25);
-                  genericRNG(); // This is for dmg
-                  enemyDamage = rngVal;
-                  rngValmin =
-                          rngValmax = (int) ((day * level) * 1.25);
-                  genericRNG(); // This is for speed
-                  enemySpeed = rngVal;
-                  rngValmin = 90;
-                  genericRNG(); // This is for defense
-                  enemyDefense = rngVal;
-              }
-              if (enemyName.contains("Bear")) {
-                  enemyHP = 240;
-                  rngValmin = 165;
-                  rngValmax = (int) ((day * level) * 1.25);
-                  genericRNG(); // This is for dmg
-                  enemyDamage = rngVal;
-                  rngValmin = 150;
-                  rngValmax = (int) ((day * level) * 1.25);
-                  genericRNG(); // This is for speed
-                  enemySpeed = rngVal;
-                  rngValmin = 105;
-                  genericRNG(); // This is for defense
-                  enemyDefense = rngVal;
-              }
-              if (enemyName.contains("Strong Bowman")) {
-                  enemyHP = 185;
-                  rngValmin = 120;
-                  rngValmax = (day * level);
-                  genericRNG(); // This is for dmg
-                  enemyDamage = rngVal;
-                  rngValmin = 75;
-                  rngValmax = (day * level);
-                  genericRNG(); // This is for speed
-                  enemySpeed = rngVal;
-                  rngValmin = 75;
-                  genericRNG(); // This is for defense
-                  enemyDefense = rngVal;
-              }
-              if (enemyName.contains("Strong Shields-man")) {
-                  enemyHP = 225;
-                  rngValmin = 65;
-                  rngValmax = (day * level);
-                  genericRNG(); // This is for dmg
-                  enemyDamage = rngVal;
-                  rngValmin = 110;
-                  rngValmax = (day * level);
-                  genericRNG(); // This is for speed
-                  enemySpeed = rngVal;
-                  rngValmin = 120;
-                  genericRNG(); // This is for defense
-                  enemyDefense = rngVal;
-              }
-          }
-          //sound effects
+        if (inWildlands) {
+            rngValmin = 1;
+            rngValmax = 2;
+            genericRNG();
+            if (rngVal == 1) enemyName = "Weak Shields-man";
+            else enemyName = "Weak Swords-man";
+        }
+        switch (enemyName) {
+            case "Weak Shields-man":
+                enemyHP = 135;
+                rngValmin = 55;
+                rngValmax = (day * level) + 15;
+                genericRNG(); // This is for dmg
+                enemyDamage = rngVal;
+                rngValmin = 80;
+                rngValmax = (day * level) + 20;
+                genericRNG(); // This is for speed
+                enemySpeed = rngVal;
+                rngValmin = 100;
+                genericRNG(); // This is for defense
+                enemyDefense = rngVal;
+                break;
+            case "Weak Swords-man":
+                enemyHP = 115;
+                rngValmin = 65;
+                rngValmax = (day * level) + 30;
+                genericRNG(); // This is for dmg
+                enemyDamage = rngVal;
+                genericRNG(); // This is for speed
+                enemySpeed = rngVal;
+                rngValmin = 60;
+                genericRNG(); // This is for defense
+                enemyDefense = rngVal;
+                break;
+        }
+              if (inMountains) {
+                rngValmin = 1;
+                rngValmax = 7;
+                genericRNG();
+                switch (rngVal) {
+                    case 2:
+                        enemyName = "Bear";
+                        break;
+                    case 4:
+                    case 5:
+                    enemyName = "Strong Bowman";
+                    break;
+                    case 6:
+                        enemyName = "Strong Shields-man";
+                        break;
+                    default: enemyName = "Strong Swords-man";
+                }
+                switch (enemyName) {
+                    case "Strong Swords-man":
+                    enemyHP = 150;
+                    rngValmin = 145;
+                    rngValmax = (int) ((day * level) * 1.25);
+                    genericRNG(); // This is for dmg
+                    enemyDamage = rngVal;
+                    rngValmin =
+                            rngValmax = (int) ((day * level) * 1.25);
+                    genericRNG(); // This is for speed
+                    enemySpeed = rngVal;
+                    rngValmin = 90;
+                    genericRNG(); // This is for defense
+                    enemyDefense = rngVal;
+                    break;
+                    case "Bear":
+                    enemyHP = 240;
+                    rngValmin = 165;
+                    rngValmax = (int) ((day * level) * 1.25);
+                    genericRNG(); // This is for dmg
+                    enemyDamage = rngVal;
+                    rngValmin = 150;
+                    rngValmax = (int) ((day * level) * 1.25);
+                    genericRNG(); // This is for speed
+                    enemySpeed = rngVal;
+                    rngValmin = 105;
+                    genericRNG(); // This is for defense
+                    enemyDefense = rngVal;
+                    break;
+                    case "Strong Bowman": {
+                    enemyHP = 185;
+                    rngValmin = 120;
+                    rngValmax = (day * level);
+                    genericRNG(); // This is for dmg
+                    enemyDamage = rngVal;
+                    rngValmin = 75;
+                    rngValmax = (day * level);
+                    genericRNG(); // This is for speed
+                    enemySpeed = rngVal;
+                    rngValmin = 75;
+                    genericRNG(); // This is for defense
+                    enemyDefense = rngVal;
+                }
+                    case "Strong Shields-man":
+                    enemyHP = 225;
+                    rngValmin = 65;
+                    rngValmax = (day * level);
+                    genericRNG(); // This is for dmg
+                    enemyDamage = rngVal;
+                    rngValmin = 110;
+                    rngValmax = (day * level);
+                    genericRNG(); // This is for speed
+                    enemySpeed = rngVal;
+                    rngValmin = 120;
+                    genericRNG(); // This is for defense
+                    enemyDefense = rngVal;
+                    break;
+                }
+            }
+            //sound effects
 
-          if (enemyName.contains("Sword")) Music.soundEffect(4);
-          enemyPower = (enemyHP + enemyDamage + enemySpeed + enemyDefense) / 4;
-      }
-    static void turnLoop() throws InterruptedException {
+            if (enemyName.contains("Sword")) combatSoundEffect(4);
+            enemyPower = (enemyHP + enemyDamage + enemySpeed + enemyDefense) / 4;
+            enemyMaxHP = enemyHP;
+    }
+
+     static void turnLoop() throws InterruptedException {
         //This just prints all the data the player needs to make their decisions.
         System.out.println("Your health: " + Math.round(playerHP));
-        System.out.println("Your stamina: " + playerStamina);
-        if (weather != 3)/*weather 3  is duststorm */ {
+        System.out.println("Your stamina: " + playerStamina + "%");
+        if (weather != 3)/*weather 3  is duststorm, which blinds you */ {
             System.out.println("Enemy health: " + Math.round(enemyHP));
-            System.out.println("Enemy stamina: " + Math.round(enemyStamina));
+            System.out.println("Enemy stamina: " + Math.round(enemyStamina) + "%");
             System.out.println("Distance: " + fightRange);
         }
         else System.out.println("The storm blinds you, not allowing you to see your opponent...");
-        System.out.println("Super: " + superMeter);
+        System.out.println("Super: " + superMeter + "%");
         System.out.println("Turn: " + turn);
         Thread.sleep(500);
         System.out.println("1: Select Attack ");
@@ -281,7 +335,7 @@ public class Combat extends Primary {
     }
 
     static void playerMove() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-        //Repostion to set up a sweet spot or to get to a safe range to wait.
+        //Reposition to set up a sweet spot or to get to a safe range to wait.
         playerIsBlocking = false;
         playerIsAttacking = false;
         hasConfirmedMove = false;
@@ -294,37 +348,32 @@ public class Combat extends Primary {
             }
             if (answerType.contains("0")) hasConfirmedMove = true;
             if (answerType.contains("A") || answerType.contains("a")) {
-                fightRange += 1;
                 {
-                    if (fightRange > 8) {
+                    if ((fightRange + 1) > 8) {
                         System.out.println("You cannot move further back. Please re-input your movement option.");
                         fightRange -=1;
                     } else {
-                        moveName = "Backpedal";
+                        moveName = "Walk Backwards";
                         playerHasWhiffed = false;
                         playerIsAttacking = false;
                         playerIsBlocking = false;
                         hasConfirmedCombat = true;
                         hasConfirmedMove = true;
                         playerStamina += 5;
-                        Music.soundEffect(11);
                     }
                 }
             }
            else if (answerType.contains("D") || answerType.contains("d")) {
-                fightRange -=1;
-                if (fightRange == 0) {
+                if ((fightRange - 1) < 0) {
                     System.out.println("You cannot move into your opponent. Please re-input your movement option.");
-                    fightRange += 1;
                 } else {
-                    moveName = "Dash";
+                    moveName = "Walk Forwards";
                     playerIsAttacking = false;
                     playerIsBlocking = false;
                     playerHasWhiffed = false;
                     hasConfirmedCombat = true;
                     hasConfirmedMove = true;
                     playerStamina += 10;
-                    Music.soundEffect(11);
                 }
             }
             else {
@@ -344,7 +393,6 @@ public class Combat extends Primary {
             moveName = "Block";
             moveDamage = 0;
             moveRange = 0;
-            moveSpeed = -1;
             hasConfirmedCombat = true;
         }
     }
@@ -386,7 +434,9 @@ public class Combat extends Primary {
             System.out.println("Or press 0 to go back.");
             playerResponse();
             if (answer != 0) tempMove = moveSet.get("Move " + answer);
-            else  hasConfirmedAtk = true;
+            else {
+                hasConfirmedAtk = true;
+            }
             while (tempMove == null || answer > 5) {
                 System.out.println("Invalid response. Please try again.");
                 playerResponse();
@@ -400,7 +450,7 @@ public class Combat extends Primary {
                 }
                 System.out.println("Swings the sword forward, hitting anyone caught in the way.");
                 System.out.println("Range: 2");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.75)));
                 System.out.println("Damage: Medium");
                 Thread.sleep(500);
@@ -426,7 +476,7 @@ public class Combat extends Primary {
                 }
                 System.out.println("Slashes at your opponent's legs.");
                 System.out.println("Range: 2");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.7)));
                 System.out.println("Damage: Medium+");
                 System.out.println("Press 1 to confirm, or press another to reselect.");
@@ -451,7 +501,7 @@ public class Combat extends Primary {
                 }
                 System.out.println("Quickly smashes the hilt of your sword against your opponent.");
                 System.out.println("Range: 1");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed)));
                 System.out.println("Damage: Medium");
                 Thread.sleep(500);
@@ -496,7 +546,7 @@ public class Combat extends Primary {
                 }
                 System.out.println("Dash forward and poke with the very edge of your sword.");
                 System.out.println("Range: 4");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.4)));
                 System.out.println("Damage: High");
                 Thread.sleep(500);
@@ -556,7 +606,7 @@ public class Combat extends Primary {
                     hasConfirmedAtk = true;
                     hasConfirmedCombat = true;
                     swordCharged = true;
-                    Music.soundEffect(9);
+                    combatSoundEffect(9);
                 } else {
                     hasConfirmedAtk = true;
                 }
@@ -570,7 +620,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 3");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.45)));
                 System.out.println("Damage: High");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -597,7 +647,7 @@ public class Combat extends Primary {
                 }
                 System.out.println("Rising Upper: Moves forward and slashes upwards, knocking the opponent back.");
                 System.out.println("Range: 2");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.6)));
                 System.out.println("Damage: Medium");
                 Thread.sleep(500);
@@ -626,7 +676,7 @@ public class Combat extends Primary {
                 }
                 System.out.println(answer + ": Vanishing Strike: Teleport to a location and slash your opponent.");
                 System.out.println("Range: 1");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.8)));
                 System.out.println("Damage: Medium+");
                 Thread.sleep(500);
@@ -661,7 +711,7 @@ public class Combat extends Primary {
             rngValmin = 5;
             rngValmax = 2;
             genericRNG();
-            Music.soundEffect(rngVal);
+            combatSoundEffect(rngVal);
         }
     }
 
@@ -713,7 +763,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.65)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -739,7 +789,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.65)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -767,7 +817,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.7)));
                 System.out.println("Damage: High");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -813,7 +863,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.6)));
                 System.out.println("Damage: High");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -843,7 +893,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.4)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -903,7 +953,7 @@ public class Combat extends Primary {
                             break;
                         }
                         System.out.println("Tai Otoshi: Grabs the opponent, throwing them down to the ground. Ignores block.");
-                        System.out.println("Cost: " + staminaCost + " Stamina");
+                        System.out.println("Cost: " + staminaCost + "% Stamina");
                         System.out.println("Press 1 to confirm, or press another to reselect.");
                         playerResponse();
                         if (answer == 1) {
@@ -925,11 +975,10 @@ public class Combat extends Primary {
                             break;
                         }
                         System.out.println("Retreating Strike: Dodge backwards, before kicking your opponent.");
-                        System.out.println("Cost: " + staminaCost + " Stamina");
+                        System.out.println("Cost: " + staminaCost + "% Stamina");
                         System.out.println("Press 1 to confirm, or press another to reselect.");
                         playerResponse();
                         if (answer == 1) {
-                            fightRange += 1;
                             moveName = "Retreating Strike";
                             moveRange = 3;
                             moveSpeed = attackSpeed * 0.7;
@@ -1016,7 +1065,22 @@ public class Combat extends Primary {
     }
     }
 
-    static void axeSelection() throws InterruptedException {
+    /*
+    this is the general format for most moves.
+    (description)
+    Range: x
+    Speed: x
+    Damage: either Low, Medium, Medium+ or High
+    Cost: x% Stamina
+    
+    if there's cc, it'll be listed here
+    
+    
+    Press 1 to confirm, or press another number to go back.
+    
+    if they press yes, confirm both atk and combat, otherwise just confirm combat.
+     */
+    static void axeSelection() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         /* Axe Movelist
         Forward Slash
         Shatter
@@ -1055,7 +1119,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.7)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -1080,15 +1144,16 @@ public class Combat extends Primary {
                 System.out.println("Plunges the blunt side of the axe into your opponent, doing major damage and knocking the enemy backwards.");
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.6)));
-                System.out.println("Damage: Extremely high");
+                System.out.println("Damage: High");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
                 if (answer == 1) {
                     moveName = "Shatter";
-                    moveDamage = (playerDamage * 1.35) * (100 / (100 + enemyDefense));
+                    moveDamage = (playerDamage * 1.25) * (100 / (100 + enemyDefense));
                     moveRange = 2;
-                    moveSpeed = (attackSpeed * 0.6);
+                    moveSpeed = (attackSpeed * 0.35);
                     playerIsAttacking = true;
                     CC += "Boop";
                     ccAmount = 2;
@@ -1109,7 +1174,7 @@ public class Combat extends Primary {
                 System.out.println("Range:1");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.8)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -1131,7 +1196,7 @@ public class Combat extends Primary {
                 System.out.println("Range:1");
                 System.out.println("Speed: " + Math.round((attackSpeed * 1.2)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: 0% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -1155,7 +1220,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 3");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.65)));
                 System.out.println("Damage: Medium");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -1208,6 +1273,7 @@ public class Combat extends Primary {
                     hasConfirmedCombat = true;
                     isIgnited = true;
                     playerStamina -= staminaCost;
+                    soundEffect(17);
                 } else {
                     hasConfirmedAtk = true;
                 }
@@ -1221,7 +1287,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.55)));
                 System.out.println("Damage: Mid");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -1249,7 +1315,7 @@ public class Combat extends Primary {
                 System.out.println("Range: 2");
                 System.out.println("Speed: " + Math.round((attackSpeed * 0.6)));
                 System.out.println("Damage: Mid");
-                System.out.println("Cost: " + staminaCost + " Stamina");
+                System.out.println("Cost: " + staminaCost + "% Stamina");
                 Thread.sleep(500);
                 System.out.println("Press 1 to confirm, or press another to reselect.");
                 playerResponse();
@@ -1277,7 +1343,7 @@ public class Combat extends Primary {
             System.out.println("Range: Infinite");
             System.out.println("Speed: " + Math.round((attackSpeed * 0.6)));
             System.out.println("Damage: Mid");
-            System.out.println("Cost: " + staminaCost + " Stamina");
+            System.out.println("Cost: " + staminaCost + "%  Stamina");
             Thread.sleep(500);
             System.out.println("Press 1 to confirm, or press another to reselect.");
             playerResponse();
@@ -1387,6 +1453,7 @@ public class Combat extends Primary {
                     if (enemyStamina > 20) {
                         enemyStamina -= 20;
                         enemyIsAttacking = true;
+                        enemyIsBlocking = false;
                         enemymoveName = "Forward Swipe";
                         enemymoveRange = 2;
                         enemymoveSpeed = (enemySpeed * 0.75);
@@ -1395,9 +1462,7 @@ public class Combat extends Primary {
                     }
                 }
                 if (rngbaddie == 5) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Forward";
-                    Music.soundEffect(11);
                 }
                 if (rngbaddie == 6) {
                     if (enemyStamina > 25) {
@@ -1424,7 +1489,6 @@ public class Combat extends Primary {
                     }
                 }
                 if (rngbaddie == 8) {
-                    fightRange += 1;
                     enemymoveName = "Walk Backwards";
                     enemyStamina += 5;
                 }
@@ -1452,9 +1516,8 @@ public class Combat extends Primary {
                 rngbaddie = rngVal;
                 if (rngbaddie == 1) {
                     enemymoveName = "Walk Forward";
-                    fightRange -= 1;
                     enemyStamina += 10;
-                    Music.soundEffect(11);
+                    combatSoundEffect(11);
                 } else if (rngbaddie == 4 && !enemyName.contains("Weak") || rngbaddie == 5 && !enemyName.contains("Weak")) {
                     if (enemyStamina >= 40) {
                         enemyStamina -= 40;
@@ -1468,7 +1531,7 @@ public class Combat extends Primary {
                 } else if (rngbaddie == 2) {
                     if (enemyStamina >= 45) {
                         enemyStamina -= 45;
-                        enemyStaminaDamage = 65;
+                        enemyStaminaDamage = 70;
                         enemyIsAttacking = true;
                         enemymoveName = "Whirlwind";
                         enemymoveRange = 3;
@@ -1487,7 +1550,7 @@ public class Combat extends Primary {
             rngValmin = 5;
             rngValmax = 2;
             genericRNG();
-            Music.soundEffect(rngVal);
+            combatSoundEffect(rngVal);
         }
     }
 
@@ -1525,12 +1588,11 @@ public class Combat extends Primary {
                     }
                 }
                 if (rngbaddie == 5) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Forward";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyStamina += 10;
-                    Music.soundEffect(11);
+                    combatSoundEffect(11);
                     enemyConfirm = true;
                 }
                 if (rngbaddie == 6) {
@@ -1559,13 +1621,10 @@ public class Combat extends Primary {
                     }
                 }
                 if (rngbaddie == 8) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Backwards";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyStamina += 5;
-                    enemyStamina += 5;
-                    Music.soundEffect(11);
                     enemyConfirm = true;
                 }
                 if (rngbaddie == 9) {
@@ -1591,13 +1650,12 @@ public class Combat extends Primary {
                 enemymoveName = "Walk Forward";
                 enemyIsAttacking = false;
                 enemyHasWhiffed = false;
-                fightRange -= 1;
                 enemyStamina += 10;
                 enemyConfirm = true;
             }
         }
     }
-    static void strongbowmanAI() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
+    static void bowmanAI() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         //The AI is RNG with odds that change depending on fight circumstances, like hp remaining, distance, or the player's weapon.
         rngValmin = 1;
         rngValmax = 10;
@@ -1613,6 +1671,7 @@ public class Combat extends Primary {
                     enemyIsAttacking = false;
                     enemyIsBlocking = false;
                     enemyStamina += 20;
+                    enemyConfirm = true;
                 }
                 if (rngbaddie == 3) {
                     if (enemyStamina >= 20) {
@@ -1622,15 +1681,15 @@ public class Combat extends Primary {
                         enemymoveRange = 2;
                         enemymoveSpeed = (enemySpeed * 0.55);
                         enemymoveDamage = (enemyDamage * 0.6) * (100 / (100 + attackDefense));
+                        enemyConfirm = true;
                     }
                 }
                 if (rngbaddie == 5) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Forward";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyStamina += 10;
-                    Music.soundEffect(11);
+                    combatSoundEffect(11);
                 }
                 if (rngbaddie == 6) {
                     if (enemyQuiver > 0) {
@@ -1641,6 +1700,7 @@ public class Combat extends Primary {
                         enemymoveSpeed = (enemySpeed * 0.65);
                         enemymoveDamage = (enemyDamage * 0.5) * (100 / (100 + attackDefense));
                         enemyQuiver -= 1;
+                        enemyConfirm = true;
                     } else {
                         System.out.println("The enemy is out of arrows!");
                         enemyHasWhiffed = true;
@@ -1654,21 +1714,22 @@ public class Combat extends Primary {
                         enemymoveRange = 2;
                         enemymoveSpeed = (enemySpeed * 0.85);
                         enemymoveDamage = (enemyDamage * 0.35) * (100 / (100 + attackDefense));
+                        enemyConfirm = true;
                     }
                 }
                 if (rngbaddie == 8 || rngbaddie == 2 || rngbaddie == 3) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Backwards";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyStamina += 5;
-                    Music.soundEffect(11);
+                    enemyConfirm = true;
                 }
                 if (rngbaddie == 9) {
                     enemymoveName = "Block";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyIsBlocking = true;
+                    enemyConfirm = true;
                 }
                 if (rngbaddie == 10) {
                     if (enemyQuiver < 5) {
@@ -1677,12 +1738,14 @@ public class Combat extends Primary {
                         enemyHasWhiffed = true;
                         enemymoveName = "Reload";
                         enemyQuiver = 5;
+                        enemyConfirm = true;
                     } else {
                         enemymoveName = "Wait";
                         enemyHasWhiffed = false;
                         enemyIsAttacking = false;
                         enemyIsBlocking = false;
                         enemyStamina += 20;
+                        enemyConfirm = true;
                     }
                 }
             } else if (fightRange <= 5) {
@@ -1692,13 +1755,14 @@ public class Combat extends Primary {
                 enemymoveSpeed = (enemySpeed * 0.65 / fightRange);
                 enemymoveDamage = (enemyDamage * 0.3) * (100 / (100 + attackDefense));
                 enemyQuiver -= 1;
+                enemyConfirm = true;
             } else {
                 enemymoveName = "Walk Forward";
                 enemyIsAttacking = false;
                 enemyHasWhiffed = false;
-                fightRange -= 1;
                 enemyStamina += 10;
-                Music.soundEffect(11);
+                combatSoundEffect(11);
+                enemyConfirm = true;
             }
         }
     }
@@ -1732,11 +1796,11 @@ public class Combat extends Primary {
                     }
                 }
                 if (rngbaddie == 5) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Forward";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyStamina += 10;
+                    enemyConfirm = true;
                 }
                 if (rngbaddie == 6) {
                     if (enemyStamina >= 40) {
@@ -1758,63 +1822,55 @@ public class Combat extends Primary {
                         enemymoveRange = 3;
                         enemymoveSpeed = (enemySpeed * 0.3);
                         enemymoveDamage = (enemyDamage * 1.1) * (100 / (100 + attackDefense));
-                        fightRange -= 1;
                         enemyConfirm = true;
                     }
                 }
                 if (rngbaddie == 8) {
-                    fightRange -= 1;
                     enemymoveName = "Walk Backwards";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyStamina += 5;
+                    enemyConfirm = true;
                 }
                 if (rngbaddie == 9) {
                     enemymoveName = "Block";
                     enemyIsAttacking = false;
                     enemyHasWhiffed = false;
                     enemyIsBlocking = true;
+                    enemyConfirm = true;
                 }
             } else {
-                enemymoveName = "Walk Forwards";
+                enemymoveName = "Walk Forward";
                 enemyIsAttacking = false;
                 enemyHasWhiffed = false;
-                fightRange -= 1;
                 enemyStamina += 10;
+                enemyConfirm = true;
+
             }
         }
     }
-    static void combatRecap() throws InterruptedException {
-        stopMusic();
-        resetMusic();
+    protected static void combatRecap() throws InterruptedException, LineUnavailableException, IOException {
         if (playerHP <= 0) {
-            /* The concequence for losing isn't a game over because the game is getting longer
-            as I work on it. Would suck if you just lost everything immediatly because you made
-            a couple bad decisions. Instead, you lose 10% of your time bank, which adds up over time.
-             */
-            System.out.println("You lost. The hours turn into days as you regain your strength...");
-            day = day + 10;
-            playerexp = playerexp + 15;
-            playerHP = 250 * level;
+            System.out.println("You were defeated.");
             isFighting = false;
         }
         if (enemyHP <= 0) {
             numOfEnemiesDefeated += 1;
             System.out.println("Victory!");
             tempVal = coin;
-            rngValmin = (int) (enemyPower/1.5);
-            rngValmax = (int) (enemyPower);
+            rngValmin = (int) (enemyPower);
+            rngValmax = (int) (enemyPower*1.2);
             genericRNG();
             coin += rngVal;
             System.out.println("You gained " + (coin - tempVal) + " coins!");
             tempVal = playerexp;
             //Getting exp based on the opponent's power may be too inconsistent of a growth right now...
-            rngValmin = (int) (enemyPower/2);
-            rngValmax = (int) (enemyPower/1.5);
+            rngValmin = (int) (enemyPower/1.5);
+            rngValmax = (int) (enemyPower);
             genericRNG();
             playerexp += rngVal;
             System.out.println("You gained " + (playerexp - tempVal) + " experience!");
-            //enemy goes to the shadow realm (aka the negative spot I put everything)
+            //enemy goes to the shadow realm (aka the negative spots I put everything)
             enemyPosX[(int) tempVal3] = -2;
             enemyPosY[(int) tempVal3] = -2;
             numofenemy -= 1;
@@ -1822,19 +1878,18 @@ public class Combat extends Primary {
         System.out.println("-----------------------------------------------------------");
     }
     static void turnResult() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-        boolean playerLandedCounterHit = false;
         boolean playerStruck = false;
         boolean enemyStruck = false;
         //Player stuff
         boolean hitTipper = false;
-        //Move specfic stuff
+        //Move specific stuff
         //Slam spacing
         if (moveName.contains("Slam")) {
             if (fightRange - 2 == 0) {
                 moveDamage = moveDamage * 1.25;
                 hitTipper = true;
             }
-            fightRange -=2;
+            fightRange -= 2;
             if (fightRange < 0) {
                 fightRange = 0;
             }
@@ -1842,23 +1897,23 @@ public class Combat extends Primary {
         //Ki Charge
         if (swordCharged && playerIsAttacking) {
             moveRange += 1;
-            if (moveName.contains("2"))
-            {
-                moveSpeed = moveSpeed*1.2;
+            if (moveName.contains("2")) {
+                moveSpeed = moveSpeed * 1.2;
                 CC += "Boop";
+                //This might actually be a nerf, but tbh i don't rlly know what to add to Ki Charge 2.
                 ccAmount = 1;
             }
-                if (fightRange - moveRange == 0) {
-                    moveDamage = moveDamage * 1.3;
-                    hitTipper = true;
-                }
+            if (fightRange - moveRange == 0) {
+                moveDamage = moveDamage * 1.3;
+                hitTipper = true;
+            }
         }
         //Pyroslash projectile
         if (usedPyroslash) {
             pyroslashLocation += 1;
             if (pyroslashLocation >= fightRange) {
                 tempVal = enemyHP;
-                moveDamage = (playerDamage*0.45) * (100/(100 + enemyDefense));
+                moveDamage = (playerDamage * 0.45) * (100 / (100 + enemyDefense));
                 enemyHP -= moveDamage;
                 System.out.println("The opponent was hit for " + (tempVal - enemyHP) + "by the Pyroslash!");
             }
@@ -1870,43 +1925,61 @@ public class Combat extends Primary {
         }
         //Dominant hand buff (+20% speed)
         if (shieldHand.contains("D")) {
-            moveSpeed = moveSpeed*1.2;
+            moveSpeed = moveSpeed * 1.2;
         }
         //Off hand buff (+15% damage)
         else if (shieldHand.contains("O")) {
-            moveDamage = moveDamage*1.15;
+            moveDamage = moveDamage * 1.15;
         }
         //Axe stuff, installs do a lot
         if (eradicateTurns > 0) {
             isIgnited = true;
-            if (!CC.isEmpty()) {
+            //If your move already has DOT, you also get a stun. This might be broken tho............. but at the same time i haven't actually used a super as of May 25, 2023 lol.
+            if (CC.contains("DOT")) {
                 CC += "Stun";
             }
             hasArmor = true;
         }
+        //Movement options
+        //If your option moves you, it should be underneath
+        switch (moveName) {
+            case "Walk Backwards", "Retreating Strike" -> fightRange += 1;
+            case "Walk Forwards" -> fightRange -= 1;
+            default -> {}
+        }
+        switch (enemymoveName) {
+            case "Walk Backwards" -> fightRange += 1;
+            case "Walk Forward", "Charge" -> fightRange -= 1;
+            default -> {}
+        }
         if (playerIsActionable) System.out.println("You used " + moveName);
+            /*if you're stunned */
         else System.out.println("You are unable to move.");
         if (enemyIsActionable) System.out.println(enemyName + " used " + enemymoveName);
         else System.out.println(enemyName + " is unable to move!");
         Thread.sleep(750);
+        //Grappling hook gives you bonus range at the cost of 20% of your move's speed.
+        //The if statement is to check if the flag is true.
         if (hasGrapplingHook) {
             moveRange += 1;
             tempVal = moveSpeed / 5;
             moveSpeed -= tempVal;
         }
         if (moveRange < fightRange && playerIsAttacking) {
-            {
                 System.out.println("You whiffed!");
                 playerHasWhiffed = true;
                 playerWhiffedturns = moveRange;
-            }
-        } else if (enemymoveRange < fightRange && enemyIsAttacking) {
+                playerIsAttacking = false;
+        }
+        if (enemymoveRange < fightRange && enemyIsAttacking) {
             System.out.println("The enemy whiffed!");
             enemyHasWhiffed = true;
             enemyWhiffedturns = enemymoveRange;
+            enemyIsAttacking = false;
             // this giant chunk of if statements is a series of checks to decide who wins if both fighters strike in the same turn.
             //The order is Speed -> Damage -> Clash (no damage taken for either side)
-        } else if (playerIsAttacking && enemyIsAttacking) {
+        }
+        if (playerIsAttacking && enemyIsAttacking) {
             //Speed comparison first
             //Checks if ur move is faster than opponent's
             if (moveSpeed > enemymoveSpeed) {
@@ -1931,27 +2004,35 @@ public class Combat extends Primary {
                 System.out.println("Clash! Both your speed and damage were identical!");
             }
         }
-        //If you're attacking and the enemy's blocking, this happens
-        if (enemyIsBlocking && !enemyIsAttacking && playerIsAttacking && !playerHasWhiffed) {
-            if (!ignoresBlock) {
-                moveDamage = moveDamage / 4;
-                System.out.println("The enemy blocked your attack!");
-                enemyStamina += staminaDamage;
-                Music.soundEffect(3);
+        /*
+        now we move to player stuff.
+        if the player is the only one attacking, we check in this order:
+        Whiffed -> Blocking
+        Cuz i want the multiplier to happen before the dmg reduction
+        in case the enemy whiffed and wants to block
+         */
+        if (playerIsAttacking) {
+            if (enemyHasWhiffed)
+            //Player stuff
+            {
+                moveDamage *= 1.35;
+                System.out.println("Bonus damage because the opponent whiffed! ");
+                enemyStruck = true;
+                enemyWhiffedturns -= 1;
+            } else if (enemyIsBlocking) {
+                if (!ignoresBlock) {
+                    moveDamage = moveDamage / 4;
+                    System.out.println("The enemy blocked your attack!");
+                    enemyStamina += staminaDamage;
+                    combatSoundEffect(3);
+                } else System.out.println("You got past the enemy's block!");
+                enemyStruck = true;
+            } else {
+                enemyStruck = true;
             }
-            else System.out.println("You got past the enemy's block!");
-            enemyStruck = true;
-        }
-        if (enemyHasWhiffed && playerIsAttacking && !playerHasWhiffed)
-        //If your opponent whiffed, you do 35% more damage. it's not that complicated bro let me keep it in
-        {
-            moveDamage *= 1.35;
-            System.out.println("Bonus damage because the opponent whiffed! ");
-            enemyStruck = true;
-            enemyWhiffedturns -= 1;
         }
         //Enemy stuff
-        else if (!playerIsAttacking && enemyIsAttacking) {
+        if (enemyIsAttacking) {
             //Same thing for players, if they whiff and the opponent hits them they take 35% extra dmg
             if (playerHasWhiffed) {
                 tempVal = playerHP;
@@ -1965,11 +2046,10 @@ public class Combat extends Primary {
                 rngValmax = 20;
                 genericRNG();
                 playerStamina += rngVal;
-                enemyStaminaDamage = enemyStaminaDamage/2;
-                Music.soundEffect(3);
+                enemyStaminaDamage = enemyStaminaDamage / 2;
+                combatSoundEffect(3);
                 playerStruck = true;
-            }
-            else {
+            } else {
                 playerStruck = true;
             }
         } else if (playerIsBlocking && enemyIsBlocking) {
@@ -1978,17 +2058,17 @@ public class Combat extends Primary {
         if (playerIsAttacking && !enemyIsAttacking && !enemyHasWhiffed && !enemyIsBlocking && (moveRange >= fightRange)) {
             enemyStruck = true;
         }
-        if (hasArmor && playerIsAttacking) {
-            System.out.println("You armored through the opponent's attack!");
-            enemyStruck = true;
-        }
-          
+          if (enemyStruck) playerStruck = false;
+          // i don't feel like debugging rn leave me alone who ever is reading this
         if (enemyStruck && !playerHasWhiffed) {
             //Sword sfx
             if (weaponName.contains("Sword") && !moveName.contains("Shove")) {
-               Music.soundEffect(8);
+               combatSoundEffect(8);
             }
-            if (enemyIsAttacking) playerLandedCounterHit = true;
+            if (weaponName.contains("Axe") && !moveName.contains("Shove")) {
+                combatSoundEffect(15);
+            }
+            if (enemyIsAttacking) playercounterHit = true;
             /*
             Quick recap
             If the opponent's attack misses, and you hit the opponent: bonus 35% damage
@@ -2000,13 +2080,13 @@ public class Combat extends Primary {
              */
             if (weaponName.contains("Shield") && moveName.contains("Shield Toss")) {
                 hasShield = false;
-                shieldLocation = fightRange - (fightRange + 1);
+                shieldLocation = fightRange - (fightRange - 1);
             }
             if (playercounterHit && enemyIsActionable) enemyStamina -= 20;
-            if (masteredWeapon && playerLandedCounterHit) isIgnited = true;
+            if (masteredWeapon && playercounterHit) isIgnited = true;
             if (isIgnited) CC += "DOT";
             if (enemyIsActionable) enemyStamina -= staminaDamage;
-            if (moveName.contains("Vanishing Strike 2") && playerLandedCounterHit) moveDamage = moveDamage * 1.25;
+            if (moveName.contains("Vanishing Strike 2") && playercounterHit) moveDamage = moveDamage * 1.25;
             tempVal = enemyHP;
             enemyHP -= moveDamage;
             System.out.println("You did " + Math.round((tempVal - enemyHP)) + " damage!");
@@ -2044,7 +2124,7 @@ public class Combat extends Primary {
                 //lets the player know that they landed the sweet spot
                 System.out.println("Direct hit! Bonus damage!");
             }
-            superMeter += Math.round(moveDamage / 3);
+            superMeter += Math.round(moveDamage / 2.5);
             //Super meter builds with damage
             if (superMeter >= 100) {
                 hasSuper = true;
@@ -2053,12 +2133,13 @@ public class Combat extends Primary {
             // this is the Sword Mastery Perk (Sword charges give charge back on sweetspot hits)
             if (weaponName.contains("Sword") && masteredWeapon && hitTipper) swordCharged = true;
             if (moveName.contains("Cripple 2")) staminaRegenPaused = ccAmount;
+            //CombatUI.barFill("Enemy Health Bar");
         }
         if (playerStruck) {
-            if (enemyName.contains("Sword")) {
+            if (enemyName.contains("Sword") && !enemymoveName.contains("Block")) {
                 //hit sfx
-                if (swordCharged) Music.soundEffect(10);
-                else Music.soundEffect(8);
+                if (swordCharged) combatSoundEffect(10);
+                else combatSoundEffect(8);
             }
             //Deflect is a counter, so we check if they got hit 
             if (moveName.contains("Deflect"))
@@ -2074,8 +2155,11 @@ public class Combat extends Primary {
                 if (playerIsAttacking) enemycounterHit = true;
                 //same for enemies
                 if (enemycounterHit) playerStamina -= 20;
-                if (playerIsActionable) playerStamina -= enemyStaminaDamage;
-                superMeter += Math.round(enemymoveDamage / 5);
+                if (playerIsActionable && enemyStaminaDamage > 0) {
+                    playerStamina -= enemyStaminaDamage;
+                    //CombatUI.barFill("Stamina Bar");
+                }
+                superMeter += Math.round(enemymoveDamage / 4);
                 tempVal = playerHP;
                 playerHP -= enemymoveDamage;
                 System.out.println(enemyName + " did " + Math.round((tempVal - playerHP)) + " damage!");
@@ -2096,11 +2180,18 @@ public class Combat extends Primary {
                 }
                     if (enemyCC.contains("Weaken Damage") || enemyCC.contains("Weaken Speed")) {
                         System.out.println("The enemy weakened you!");
-                        if (CC.contains("Weaken Damage")) playerDamage = playerDamage * (100 / (100 * ccAmount));
-                        if (CC.contains("Weaken Speed")) attackSpeed = attackSpeed * (100 / (100 * ccAmount));
+                        if (CC.contains("Weaken Damage")) playerDamage = playerDamage * ((double) 100 / (100 * ccAmount));
+                        if (CC.contains("Weaken Speed")) attackSpeed = attackSpeed * ((double) 100 / (100 * ccAmount));
                     }
                 }
+            //CombatUI.barFill("Health Bar");
+            //CombatUI.barFill("Enemy Stamina Bar");
             }
+
+        /*
+        if either the player or the enemy ran out of stamina, they should
+        be stunned for a turn.
+         */
         if (enemyStamina <= 0)
         {
             System.out.println("The enemy's stamina has been depleted!");
@@ -2121,6 +2212,7 @@ public class Combat extends Primary {
         }
     static void resetCombatVar() throws InterruptedException {
         clearConsole();
+        //for stamina
         unactionableTurns -= 1;
         enemyUnactionableTurns -= 1;
         if (unactionableTurns <= 0) {
@@ -2134,10 +2226,10 @@ public class Combat extends Primary {
             enemyUnactionableTurns = 0;
             if (!enemyIsActionable) {
                 enemyIsActionable = true;
-                enemyUnactionableTurns = 0;
                 enemyStamina = 100;
             }
         }
+        //for whiffs
         enemyWhiffedturns -= 1;
         playerWhiffedturns -= 1;
         if (enemyWhiffedturns <= 0)
@@ -2160,7 +2252,8 @@ public class Combat extends Primary {
         if (!hasGrapplingHook) {
             moveRange = 0;
         }
-        //can't go above 100, although maybe i'll add it for axe super?
+        //can't go above 100 since its supposed to be a percentage, although maybe i'll add it for axe super?
+        //edit: maybe i should finish the game first.
         if (playerStamina > 100) playerStamina = 100;
         if (enemyStamina > 100) enemyStamina = 100;
         staminaCost = 0;
@@ -2176,6 +2269,8 @@ public class Combat extends Primary {
         hasConfirmed = false;
         usedPyroslash = false;
         ignoresBlock = false;
+        enemyStaminaDamage = 0;
+        staminaDamage = 0;
         answer = 0;
         answerType = "";
         CC = "";
@@ -2190,7 +2285,7 @@ public class Combat extends Primary {
         System.out.println("Thousands of people entered... only 2 remain.");
         Thread.sleep(1000);
         rngValmin = 1;
-        rngValmax = 2;
+        rngValmax = 3; 
         genericRNG();
         if (rngVal == 1)
         {
@@ -2200,7 +2295,7 @@ public class Combat extends Primary {
         {
             bossIsShieldsman = true;
         }
-        else if (rngVal == 3){
+        else {
             bossIsBowman = true;
             enemyQuiver = 7;
         }
@@ -2262,7 +2357,27 @@ public class Combat extends Primary {
             bossHasSwapped += 1;
         }
         if (bossIsSwordsman) SwordsmanAI();
-        else if (bossIsBowman) strongbowmanAI();
+        else if (bossIsBowman) bowmanAI();
         else if (bossIsShieldsman) shieldsmanAI();
+    }
+
+    protected static void combatMusic(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        combatSetFile(trackNum);
+        combatStartClip();
+        combatLoopClip();
+        musicPlaying = true;
+    }
+
+    protected static void combatStopMusic() throws LineUnavailableException, IOException {
+        if (dayMusic != null) {
+            combatStopClip();
+            musicPlaying = false;
+        } else {
+            System.out.println("Clip is already stopped or not initialized.");
+        }
+    }
+    protected static void combatSoundEffect(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        setFile(trackNum);
+        startClip();
     }
 }
