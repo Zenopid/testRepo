@@ -392,7 +392,7 @@ public class Primary {
         Combat.fight();
         ending();
     }
-    // mayowa.... why....
+    // Mayowa.... why....
     //This was supposed to be less complicated than the 1st version...
     static void offenseTutorial() throws InterruptedException {
         System.out.println("Offense");
@@ -405,7 +405,7 @@ public class Primary {
         Thread.sleep(1000);
         System.out.println("Stun: Prevent your opponent from moving.");
         System.out.println("Knockback: Pushes your opponent back, creating space.");
-        System.out.println("Vaccum: Brings your enemy closer.");
+        System.out.println("Vacuum: Brings your enemy closer.");
         System.out.println("Cripple: Reduces the enemy's damage and defense.");
         Thread.sleep(3000);
         System.out.println("There are also utility items that allow you to increase your stats.");
