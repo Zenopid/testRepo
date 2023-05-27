@@ -238,7 +238,6 @@ public class Primary {
 
     protected static double tempVal3 = 0;
 
-    protected String tempString = "";
 
         /*
      generic doubles for all random number generator needs
@@ -276,7 +275,6 @@ public class Primary {
     protected static int musicFile = -1;
 
     public static void main(String[] args) throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-     Music music = new Music();
         for (int cnt = 0; cnt < enemyPosX.length; cnt++) {
             enemyPosX[cnt] = -2;
             enemyPosY[cnt] = -2;
@@ -345,19 +343,15 @@ public class Primary {
                 }
                 playerResponse();
                 switch (answer) {
-                    case 2:
+                    case 2 -> {
                         hasConfirmed = false;
                         tempVal = playerPosX;
                         tempVal2 = playerPosY;
                         exploreZenotopia();
-                        break;
-                    case 3:
-                        skillTree();
-                        break;
-                    case 4:
-                        playerLoadout();
-                        break;
-                    case 5: {
+                    }
+                    case 3 -> skillTree();
+                    case 4 -> playerLoadout();
+                    case 5 -> {
                         stopMusic();
                         resetMusic();
                         if (inWildlands && onShop) {
@@ -367,14 +361,11 @@ public class Primary {
                         if (inMountains && onShop) {
                             playMusic(12);
                             advancedShop();
-                        }
-                        else if (onDungeon) {
+                        } else if (onDungeon) {
                             Dungeon.undergroundExplore();
                         }
-                        break;
                     }
-                    default:
-                        upgradeGear();
+                    default -> upgradeGear();
                 }
             }
             playerPosChecker();
@@ -425,7 +416,7 @@ public class Primary {
         Thread.sleep(1000);
     }
 
-    static void selectWeapon() throws InterruptedException {
+    static void selectWeapon() {
         System.out.println("Select your starting weapon: ");
         System.out.println("1: Sword: Balanced between offense and defense.");
         System.out.println("2: Shield: High defense and speed at the cost of offense.");
@@ -433,7 +424,7 @@ public class Primary {
     }
 
 
-    static void genericRNG() throws InterruptedException {
+    static void genericRNG() {
         rngVal = 0;
         Random rand = new Random();
         rngVal = rand.nextInt(rngValmax) + rngValmin;
@@ -1566,6 +1557,11 @@ public class Primary {
                             tempVal2 = cycloneStraws;
                             shopExchange();
                             System.out.println("You bought " + (cycloneStraws - tempVal2) + " cyclone straws.");
+                        }
+                        case 6 -> {
+                            exchangeRate = 160;
+                            improveRate = 1;
+                            System.ou
                         }
                         default -> {
                             System.out.println("I can't help but feel like you're just messing with me.");
