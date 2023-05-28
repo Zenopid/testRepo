@@ -1370,78 +1370,63 @@ import java.io.IOException;
         Soul Snatcher: ~15% of opponent's HP (needs to be looked at, seems broken)
          */
         System.out.println("Select your utility, or press 0 to leave.");
-        boolean hasConfirmedUtil = false;
-        while (!hasConfirmedUtil) {
-            if (grapplingHook > 0) {
-                System.out.println("1: Grappling Hook");
-            }
-            if (regenerativeStone > 0) {
-                System.out.println("2: Regenerative Stone");
-            }
-            if (soulSnatcher > 0) {
-                System.out.println("3: Soul Snatcher");
-            }
+            if (grapplingHook > 0) System.out.println("1: Grappling Hook");
+            if (regenerativeStone > 0) System.out.println("2: Regenerative Stone");
+            if (soulSnatcher > 0) System.out.println("3: Soul Snatcher");
+            if (smokeBombs > 0) System.out.println("4: Smoke Bomb");
+            if (cycloneStraws > 0) System.out.println("5: Cyclone Straw");
+            if (magmaWhistle > 0) System.out.println("Magma Whistle");
             playerResponse();
-            if (answer == 0)
-            {
-                hasConfirmedUtil = true;
-            }
-            if (answer == 1)
-            {
-                System.out.println("You are using grappling hook. Press 1 to confirm, or press another number to change.");
-                playerResponse();
-                if (answer == 1)
-                {
-                    grapplingHook -= 1;
-                    hasGrapplingHook = true;
-                    hasConfirmedCombat = true;
-                    hasConfirmedUtil = true;
-                    System.out.println("Grappling hook engaged!");
+            switch (answer) {
+                case 1 ->{
+                    System.out.println("You are using grappling hook. Press 1 to confirm, or press another number to change.");
+                    playerResponse();
+                    if (answer == 1) {
+                        grapplingHook -= 1;
+                        hasGrapplingHook = true;
+                        hasConfirmedCombat = true;
+                        System.out.println("Grappling hook engaged!");
+                    }
+                    else System.out.println("You did not confirm.");
                 }
-            }
-            if (answer == 2)
-            {
-                System.out.println("You are using a regenerative stone. Press 1 to confirm, or press another number to change.");
-                playerResponse();
-                if (answer == 1)
-                {
-                    regenerativeStone -= 1;
-                    tempVal2 = playerHP;
-                    tempVal = playerHP/5;
-                    playerHP += tempVal;
-                    System.out.println("You recovered " + (playerHP - tempVal2) + " hp!");
-                    hasConfirmedCombat = true;
-                    hasConfirmedUtil = true;
+                case 2 -> {
+                    System.out.println("You are using a regenerative stone. Press 1 to confirm, or press another number to change.");
+                    playerResponse();
+                    if (answer == 1) {
+                        regenerativeStone -= 1;
+                        tempVal2 = playerHP;
+                        tempVal = playerHP / 5;
+                        playerHP += tempVal;
+                        System.out.println("You recovered " + (playerHP - tempVal2) + " hp!");
+                        hasConfirmedCombat = true;
+                    }
+                    else System.out.println("You did not confirm.");
                 }
-            }
-            if (answer == 3)
-            {
-                System.out.println("You are using a Soul Snatcher. Press 1 to confirm, or press another number to change.");
-                playerResponse();
-                if (answer == 1)
-                {
-                    soulSnatcher -= 1;
-                    tempVal2 = enemyHP;
-                    tempVal = enemyHP/6;
-                    enemyHP -= tempVal;
-                    System.out.println("You removed " + (tempVal2 - enemyHP) + " hp!");
-                    hasConfirmedCombat = true;
-                    hasConfirmedUtil = true;
-                    //might rework this into a move... seems kinda broken LMAO
+                case 3 -> {
+                    System.out.println("You are using a Soul Snatcher. Press 1 to confirm, or press another number to change.");
+                    playerResponse();
+                    if (answer == 1) {
+                        soulSnatcher -= 1;
+                        tempVal2 = enemyHP;
+                        tempVal = enemyHP / 6;
+                        enemyHP -= tempVal;
+                        System.out.println("You removed " + (tempVal2 - enemyHP) + " hp!");
+                        hasConfirmedCombat = true;
+                        //might rework this into a move... seems kinda broken LMAO
+                    }
+                    else System.out.println("You did not confirm.");
                 }
+                default -> {}
             }
-        }
     }
 
     static void SwordsmanAI() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         //The AI is RNG with odds that change depending on fight circumstances, like hp remaining, distance, or the player's weapon.
         rngValmin = 1;
-        if (enemyName.contains("Weak Swords-man")) {
-            rngValmax = 9;
-        } else rngValmax = 10;
         enemyConfirm = false;
         while (!enemyConfirm) {
-            genericRNG();
+           if (enemyName.contains("Weak Swords-man")) genericRNG(1,9);
+           else genericRNG(1,10);
             rngbaddie = rngVal;
             //System.out.println("rngVal" + rngVal);
             if (fightRange <= 2) {
