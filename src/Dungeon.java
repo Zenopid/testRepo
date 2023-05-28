@@ -161,35 +161,44 @@ public class Dungeon extends Combat {
             }
             hasConfirmed = false;
             while (!hasConfirmed) {
-                if (answerType.contains("A") || answerType.contains("a")) {
+                switch (anawerType) {
+                case "a"
+                case "A": {
                     playerPosX -= 1;
                     if (playerPosX < 0) {
                         System.out.println("You almost fall into a secret pit.");
                         playerPosX = (int) tempVal;
-                    } else hasConfirmed = true;
+                    } else {hasConfirmed = true; break;}
                 }
-                if (answerType.contains("D") || answerType.contains("d")) {
+                case "d":
+                case "D": 
+                {
                     playerPosX += 1;
                     if (playerPosX > dungeonExitX) {
                         System.out.println("You almost run into spikes.");
-                    } else hasConfirmed = true;
+                    } else { hasConfirmed = true; break; }
                 }
-                    if (answerType.equals("W") || answerType.equals("w")) {
+                case "w":
+                case "W":
+                    {
                         playerPosY += 1;
                         if (playerPosY > dungeonExitY) {
                             System.out.println("A dark voice starts chanting, so you figure it's best to turn around.");
                             playerPosY = (int) tempVal2;
-                        } else hasConfirmed = true;
-                    if (answerType.equals("S") || answerType.equals("s")) {
+                        } else { hasConfirmed = true; break }
+                     }
+                case "s": 
+                case "S": {
                         playerPosY = playerPosY - 1;
                         if (playerPosY < 0) {
                             System.out.println("You almost fell into a secret pit.");
                             playerPosY = playerPosY + 1;
                             playerPosY = (int) tempVal2;
-                        } else hasConfirmed = true;
+                        } else { hasConfirmed = true; break }
                     }
                 }
             }
+}
 
 static void dungeonExit() throws InterruptedException {
     if (dungeonTimer - dungeonTurn != 0)
