@@ -2,15 +2,13 @@ import java.io.IOException;
 import java.net.URL;
 import javax.sound.sampled.*;
 
-
-
 /*
 Primary is the main class
 Music extends Primary
 Combat extends Music
 Dungeon extends Combat
  */
- class Music extends Primary {
+ class Music {
      static Clip dayMusic;
 
      private static Clip combatMusic;
@@ -21,7 +19,7 @@ Dungeon extends Combat
      public Music() {
          //Sound tracks
          //  Day Themes
-         soundURL[0] = getClass().getResource("sound_effects/day_themes/day_Loop_Theme.wav");
+         soundURL[0] = getClass().getResource("sound_effects/day_themes/dayloop_Theme.wav");
          //  Battle Themes
          soundURL[1] = getClass().getResource("sound_effects/battle_themes/generic_battle_theme.wav");
          soundURL[2] = getClass().getResource("sound_effects/battle_themes/alt_battle_theme.wav");
@@ -53,8 +51,7 @@ Dungeon extends Combat
          //Upgrades
          soundURL[14] = getClass().getResource("sound_effects/upgrade_sfx/hammer_sfx.wav");
      }
-
-     public static void setFile(int trackNum) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+     public static void setFile(int trackNum) {
          try {
              //System.out.println(trackNum);
              //System.out.println(soundURL[trackNum]);// in case I need to check if a file is null
@@ -64,27 +61,32 @@ Dungeon extends Combat
          } catch (Exception e) {
              System.out.println(e);
          } finally {
-             musicFile = trackNum;
+             Primary.musicFile = trackNum;
          }
      }
-
      public static void startClip() {
-         dayMusic.start();
+         try {
+             dayMusic.start();
+         }
+         catch (Exception e) {
+             System.out.println(e);
+         }
      }
-
      public static void loopClip() {
-         dayMusic.loop(dayMusic.LOOP_CONTINUOUSLY);
+         try {
+             dayMusic.loop(dayMusic.LOOP_CONTINUOUSLY);
+         }
+         catch (Exception e) {
+             System.out.println(e);
+         }
      }
-
-
-     public static void stopClip() throws LineUnavailableException, IOException {
+     public static void stopClip() {
          if (dayMusic != null && dayMusic.isRunning()) {
              dayMusic.stop();
              dayMusic.drain();
              dayMusic.close();
          }
      }
-
      public static void combatSetFile(int trackNum) {
              try {
                  //System.out.println(trackNum);
@@ -95,18 +97,15 @@ Dungeon extends Combat
              } catch (Exception e) {
                  System.out.println(e);
              } finally {
-                 musicFile = trackNum;
+                 Primary.musicFile = trackNum;
              }
      }
-
      public static void combatStartClip() {
          combatMusic.start();
      }
-
      public static void combatLoopClip() {
          combatMusic.loop(Clip.LOOP_CONTINUOUSLY);
      }
-
      public static void combatStopClip() {
          if (combatMusic != null && combatMusic.isRunning()) {
              combatMusic.stop();
@@ -114,8 +113,7 @@ Dungeon extends Combat
              combatMusic.close();
          }
      }
-
-     public static void dungeonSetFile(int trackNum) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+     public static void dungeonSetFile(int trackNum) {
          //System.out.println(trackNum);
          //System.out.println(soundURL[trackNum]);// in case I need to check if a file is null
         try {
@@ -125,18 +123,15 @@ Dungeon extends Combat
      } catch (Exception e) {
          System.out.println(e);
      } finally {
-         musicFile = trackNum;
+         Primary.musicFile = trackNum;
      }
      }
-
      public static void dungeonStartClip() {
          dungeonMusic.start();
      }
-
      public static void dungeonLoopClip() {
          dungeonMusic.loop(Clip.LOOP_CONTINUOUSLY);
      }
-
      public static void dungeonStopClip() {
          if (dungeonMusic != null && dungeonMusic.isRunning()) {
              dungeonMusic.stop();

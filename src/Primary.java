@@ -17,82 +17,50 @@ public class Primary {
 
     protected static int decayImp = 2;
     //imp stands for improve, this is to decrease gear improvement if used too much
-
     protected static int level = 1;
-
     protected static int rngVal = 0;
-
-    protected static int rngValmin = 0;
-
-    protected static int rngValmax = 0;
-
 
     /*
      generic ints for all random number generator needs
     rngVal = the value created in the rng code
     rngValmin = the minimum amount the code can create
     rngValmax = the random number possibility
-
     for example
-
     rngValmin = 50
     rngValmax = 50
-
     this would create a value of 50 and a random number between 0 and a maximum of 50
-
     then these 2 values would be added together to form rngVal
-
     which then can be pulled by another method.
      */
 
     //Time and weather
     protected static int day = 1;
-
     protected static int weather = 0;
 
     protected static boolean spentDay = false;
 
     // Gear and stats
-
     protected static int requiredXP = 100;
-
     protected static int skillPoints = 0;
     protected static double playerDefense = 0;
-
     protected static double playerSpeed = 0;
-
     protected static double weapondmg = 0;
-
     protected static double playerPower = 0;
-
     protected static boolean masteredWeapon = false;
     protected static boolean hasSuper = false;
-
     protected static String weaponName = "";
     protected static int grapplingHook = 0;
-
     protected static int regenerativeStone = 0;
-
     protected static int soulSnatcher = 0;
-
     protected static int smokeBombs = 0;
-
     protected static int cycloneStraws = 0;
-
     protected static int magmaWhistle = 0;
-
     protected static double playerHP = 200 + (50* level);
-
-
     protected static int coin = 0;
-
     //Money. Used to buy utility items as well as fast travel.
 
-
     //Combat
-
     static HashMap<String, String> moveSet = new HashMap<>();
-
 
     protected static int numofmoves = 5;
 
@@ -100,143 +68,83 @@ public class Primary {
     protected static boolean playerIsBlocking = false;
 
     protected static boolean enemyIsBlocking = false;
-
     protected static int ccAmount = 0;
-
     protected static boolean playercounterHit = false;
-
     protected static boolean enemycounterHit = false;
     protected static int playerStamina = 100;
-
     protected static int enemyStamina = 100;
-
     protected static int staminaDamage = 0;
-
     protected static int enemyStaminaDamage = 0;
-
     protected static int superMeter = 0;
     protected static boolean playerIsAttacking = false;
-
     protected static boolean playerHasWhiffed = false;
-
     protected static int playerWhiffedturns = 0;
-
     protected static int enemyWhiffedturns = 0;
-
     protected static boolean enemyIsAttacking = false;
-
     protected static boolean enemyHasWhiffed = false;
-
     protected static String moveName = "";
     protected static int rngbaddie = 0;
-
     protected static double enemyHP;
-
     protected static double enemyDefense = 0;
-
     protected static double enemyDamage = 0;
-
     protected static double enemyPower = 0;
-
     protected static int moveRange = 0;
-
     protected static double moveDamage = 0;
-
     protected static double moveSpeed = 0;
-
     protected static String enemymoveName = "";
-
     protected static double enemymoveDamage = 0;
-
     protected static double enemymoveSpeed = 0;
-
     protected static int enemymoveRange = 0;
-
     protected static double enemySpeed = 0;
-
     protected static double enemyQuiver = 5;
-
     protected static boolean hasGrapplingHook = false;
-
     protected static int fightRange = 2;
     protected static int turn = 1;
     protected static boolean isFighting;
-
     protected static boolean isBoss;
-
     protected static boolean bossIsSwordsman;
-
     protected static boolean bossIsBowman;
-
     protected static boolean bossIsShieldsman;
-
+    protected static String bossStance = "";
     protected static int bossHasSwapped = 0;
 
-
     //World interaction
-
     protected static boolean playerLeft = false;
-
     protected static boolean hasConfirmedShop = false;
-
     protected static boolean onShop;
-
     protected static boolean onDungeon = false;
-
     protected static int numofshops = 1;
     protected static int[] shopPosX = new int[100];
-
     protected static int[] shopPosY = new int[100];
-
     protected static int shopCNT = 0;
     protected static int numofchest = 1;
     protected static int[] chestPosX = new int[100];
     protected static int[] chestPosY = new int[100];
     protected static int numofenemy = 1;
-
     protected static int numOfEnemiesDefeated = 0;
     protected static boolean hasConfirmed = false;
     protected static int[] enemyPosX = new int[100];
-
     protected static int[] enemyPosY = new int[100];
-
     protected static int[] shelterPosX = new int[100];
-
     protected static int[] shelterPosY = new int[100];
-
     protected static int numofshelters = 10;
-
     protected static int boltPosX = -6;
-
     protected static int boltPosY = -6;
-
     protected static int[] dungeonPosX = new int[100];
-
     protected static int[] dungeonPosY = new int[100];
-
     protected static int numofdungeons = 0;
     protected static boolean underShelter = true;
     protected static int playerexp = 0;
-
     protected static int playerPosX = 0;
-
     protected static int playerPosY = 0;
-
     protected static boolean inWildlands = true;
-
     protected static boolean inMountains = false;
-
     protected static boolean inDungeon = false;
 
     //Assorted Variables (Not specfic to any one aspect of the game)
-
     protected static double tempVal = 0;
-
     protected static double tempVal2 = 0;
-
     protected static double tempVal3 = 0;
-
-
         /*
      generic doubles for all random number generator needs
     rngVal = the value created in the rng code
@@ -254,25 +162,19 @@ public class Primary {
 
     which then can be pulled by another method.
      */
-
-
     protected static int answer = 0;
-
     protected static String answerType = "";
     protected static boolean isSnowing = false;
     protected static boolean hasConfirmedAtk;
     protected static boolean hasConfirmedMove;
-
     protected static boolean hasConfirmedCombat = false;
     private static int cost;
 
     //Music
-
     protected static boolean musicPlaying = false;
-
     protected static int musicFile = -1;
-
     public static void main(String[] args) throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
+        Music audio = new Music();
         for (int cnt = 0; cnt < enemyPosX.length; cnt++) {
             enemyPosX[cnt] = -2;
             enemyPosY[cnt] = -2;
@@ -308,7 +210,6 @@ public class Primary {
         else if (answer == 2) getShield();
         else if (answer >= 3) getAxe();
         //Day loop
-        Primary.playMusic(0);
         while (day <= 100) {
             System.out.println("Its day " + day);
             enemySpawner();
@@ -322,7 +223,7 @@ public class Primary {
             spentDay = false;
             Thread.sleep(1000);
             while (!spentDay) {
-                if (!musicPlaying) Primary.playMusic(0);
+                if (!musicPlaying) playMusic(0);
                 dayLoop();
                 for (int cnt3 = 0; cnt3 < shopPosX.length; cnt3++) {
                     if (playerPosX == shopPosX[cnt3] && playerPosY == shopPosY[cnt3] && !isSnowing && !inDungeon) {
@@ -335,9 +236,7 @@ public class Primary {
                         onShop = false;
                         underShelter = true;
                         tempVal = 2;
-                    } else {
-                        onShop = false;
-                    }
+                    } else onShop = false;
                 }
                 playerResponse();
                 switch (answer) {
@@ -359,9 +258,7 @@ public class Primary {
                         if (inMountains && onShop) {
                             playMusic(12);
                             advancedShop();
-                        } else if (onDungeon) {
-                            Dungeon.undergroundExplore();
-                        }
+                        } else if (onDungeon) Dungeon.undergroundExplore();
                     }
                     default -> upgradeGear();
                 }
@@ -445,8 +342,6 @@ public class Primary {
                 } else if (inMountains) {
                     genericRNG(25,25);
                     enemyPosX[z] = rngVal;
-                    rngValmin = 1;
-                    rngValmax = 24;
                     genericRNG(1,25);
                     enemyPosY[z] = rngVal;
                 }
@@ -497,8 +392,6 @@ public class Primary {
             //Hopefully stops shelter locations from changing...
             {
                 if (inWildlands) {
-                    rngValmin = 1;
-                    rngValmax = 24;
                     genericRNG(1, 24);
                     shelterPosX[z] = rngVal;
                     genericRNG(1, 24);
@@ -570,7 +463,7 @@ public class Primary {
 
     }
 
-    static void getSword() throws InterruptedException {
+    static void getSword() {
         System.out.println("Sword? You're really basic.");
         weaponName = "Sword";
         getSwordRNG();
@@ -591,7 +484,7 @@ public class Primary {
         playerSpeed += rngVal;
     }
 
-    static void getShield() throws InterruptedException {
+    static void getShield() {
         System.out.println("Shield? You must not be very confident.");
         weaponName = "Shield";
         getShieldRNG();
@@ -611,7 +504,7 @@ public class Primary {
         playerDefense += rngVal;
     }
 
-    static void getAxe() throws InterruptedException {
+    static void getAxe() {
         System.out.println("Axe? Now we're talking...");
         weaponName = "Axe";
         getAxeRNG();
@@ -622,7 +515,7 @@ public class Primary {
         moveSet.put("Move 5", "Skewer");
     }
 
-    protected static void skillTree() throws InterruptedException {
+    protected static void skillTree() {
         cost = 0;
         answerType = "";
         hasConfirmed = false;
@@ -996,24 +889,17 @@ public class Primary {
     }
 
     static void playerLoadout() {
-        boolean countPast5;
         boolean changingLoadout = true;
         System.out.println("Press 0 to exit, or press another number to continue.");
         playerResponse();
         if (answer == 0)  changingLoadout = false;
         while (changingLoadout) {
-            countPast5 = false;
-            {
                 System.out.println("Equipped: ");
                 System.out.println("---------------------------------------------------------------");
-            }
             for (int count = 1; count < numofmoves + 1; count++) {
                 System.out.println("Move " + count + ": " + moveSet.get("Move " + count) + ".");
-                if (count >= 5 && !countPast5) {
-                    System.out.println("---------------------------------------------------------------");
+                if (count == 5) System.out.println("---------------------------------------------------------------");
                     //When the 5tb move is displayed, this line will also appear, shwoing that it's the last equipped move.
-                    countPast5 = true;
-                }
             }
             System.out.println("Select the move you want to swap out using its corresponding number.");
             playerResponse();
@@ -1024,7 +910,7 @@ public class Primary {
                 equippedMove = moveSet.get("Move " + answer);
             }
             System.out.println("Old move is " + equippedMove);
-            tempVal2 = answer;
+            int x = answer;
             System.out.println("Select the move you want to swap in.");
             playerResponse();
             String newMove = moveSet.get("Move " + answer);
@@ -1034,20 +920,14 @@ public class Primary {
                 newMove = moveSet.get("Move " + answer);
             }
             System.out.println("New move is " + newMove);
-            moveSet.replace("Move " + tempVal2, equippedMove, newMove);
+            moveSet.replace("Move " + x, equippedMove, newMove);
             moveSet.replace("Move " + answer, newMove, equippedMove);
-            {
                 System.out.println("Equipped: ");
                 System.out.println("---------------------------------------------------------------");
-            }
-            countPast5 = false;
             for (int count = 1; count < numofmoves + 1; count++) {
                 System.out.println("Move " + count + ": " + moveSet.get("Move " + count) + ".");
-                if (count >= 5 && !countPast5) {
-                    System.out.println("---------------------------------------------------------------");
-                    countPast5 = true;
+                if (count == 5) System.out.println("---------------------------------------------------------------");
                     //welp... i have no idea.
-                }
             }
             System.out.println("Press 0 to leave, or press another number to continue.");
             playerResponse();
@@ -1056,8 +936,6 @@ public class Primary {
     }
 
     static void chestSpawner() {
-        rngValmin = 1;
-        rngValmax = 4;
         genericRNG(1, 4);
         numofchest += rngVal;
         for (int b = 0; b < numofchest; b++) {
@@ -1183,8 +1061,6 @@ public class Primary {
                 case 2 -> {
                     System.out.println("Thunderstorm: Lighting randomly strikes a tile, destroying anything on it.");
                     if (inWildlands) {
-                        rngValmin = 1;
-                        rngValmax = 24;
                         genericRNG(1,24);
                         boltPosX = rngVal;
                         genericRNG(1,24);
@@ -1588,8 +1464,7 @@ public class Primary {
             if (inWildlands) System.out.println("Yeah... you're way too poor for that.");
             else if (inMountains) System.out.println("Not much I can do if you don't have the money, I'm afraid.");
         }
-        else
-        {
+        else {
             if (inWildlands) System.out.println("Make up your mind...");
             else if (inMountains) System.out.println("Alright, if you say so.");
         }
@@ -1641,7 +1516,6 @@ public class Primary {
     }
     static void endOfDay() throws InterruptedException {
         playerexp += 15;
-        rngValmin = 25;
         genericRNG(25*level,25*level);
         coin += rngVal;
         requiredXP = 80*level;
@@ -1703,8 +1577,6 @@ public class Primary {
     static void upgradeGear() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         while ((day * level) / 2 - decayImp <= 0) decayImp -= 1;
             //Can't let decayImp make the increase 0 or less
-        rngValmin = 1;
-        rngValmax = 6;
         genericRNG(1,6);
         int x = rngVal;
         if (inWildlands) genericRNG((day*level)/2 + 20, -(decayImp));
@@ -1734,15 +1606,12 @@ public class Primary {
                 coin += rngVal;
                 System.out.println("You didn't upgrade your armor, but you found " + Math.round((coin - tempVal)) + " coins lying around.");
             }
-            default: {
-                System.out.println("You couldn't upgrade your armor.");
-            }
+            default: System.out.println("You couldn't upgrade your armor.");
         }
         if (x != 6) soundEffect(14);
         decayImp += (decayImp)*1.15;
             spentDay = true;
         }
-
     static void exploreZenotopia() {
         String answerType;
         boolean hasConfirmedTraversal = false;
@@ -1761,19 +1630,19 @@ public class Primary {
                     if (playerPosX < 0) {
                         System.out.println("You almost fall off a cliff and die. That would've been funny.");
                         playerPosX = (int) tempVal;
-                        hasConfirmedTraversal = true;
                     }
+                    hasConfirmedTraversal = true;
                     break;
                 }
             case "d":
             case "D":
                  {
                     playerPosX += 1;
-                     if (playerPosX < 50) {
+                     if (playerPosX > 50) {
                          System.out.println("You almost fall off a cliff and die. That would've been funny.");
                          playerPosX = (int) tempVal;
-                         hasConfirmedTraversal = true;
                      }
+                     hasConfirmedTraversal = true;
                     break;
                 }
                 case "w":
@@ -1782,8 +1651,8 @@ public class Primary {
                     if (playerPosY > 25) {
                         System.out.println("You run into a wall and fall over. The king laughs at you.(can't exceed 25 units up)");
                         playerPosY = (int) tempVal2;
-                        hasConfirmedTraversal = true;
                     }
+                    hasConfirmedTraversal = true;
                     break;
                 }
                 case "s":
@@ -1793,12 +1662,13 @@ public class Primary {
                         System.out.println("You run into a wall and fall over. The king laughs at you.(can't have negative y coordinate)");
                         playerPosY = (int) tempVal2;
                         hasConfirmed = true;
-                        hasConfirmedTraversal = true;
                     }
+                    hasConfirmedTraversal = true;
                     break;
                 }
                 default: {
                     System.out.println("You did not input a valid response.");
+                    hasConfirmedTraversal = true;
                     hasConfirmed = true;
                     KB.next();
                 }

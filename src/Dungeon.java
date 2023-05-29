@@ -34,7 +34,7 @@ public class Dungeon extends Combat {
         dEnemyPosY[0] = dungeonExitY;
         dungeonEnemySpawner();
         startDungeon();
-        dungeonMusic(13);
+        dungeonMusic();
             while (inDungeon) {
                 System.out.println("You have " + dungeonTimer + " turns to escape the dungeon.");
                 if (dungeonTimer - dungeonTurn == 0) {
@@ -43,12 +43,8 @@ public class Dungeon extends Combat {
                 }
                 dungeonTurnLoop();
                 playerResponse();
-                if (answer == 1) {
-                    dungeonRecover();
-                }
-                else if (answer == 2) {
-                dungeonMove();
-                }
+                if (answer == 1) dungeonRecover();
+                else if (answer == 2) dungeonMove();
                 for (int m = 0; m < enemyPosX.length; m++) {
                     if (playerPosX == dEnemyPosX[m] && playerPosY == dEnemyPosY[m] && !inDungeon) {
                         isFighting = true;
@@ -65,15 +61,11 @@ public class Dungeon extends Combat {
         }
         static void chestNumber() throws InterruptedException {
         if (inWildlands) {
-            rngValmin = 1;
-            rngValmax = 2;
-            genericRNG();
+            genericRNG(1,2);
             dnumofchest  = rngVal;
         }
         else if (inMountains) {
-            rngValmin = 2;
-            rngValmax = 3;
-            genericRNG();
+            genericRNG(2,3);
             dnumofchest = rngVal;
         }
         }
@@ -86,50 +78,34 @@ public class Dungeon extends Combat {
         playerPosY = 0;
         if (inWildlands) {
             dungeonTimer = 25;
-            rngValmin = 350;
-            rngValmax = 100;
-            genericRNG();
+            genericRNG(350,100);
             dungeonPower = rngVal;
         } else if (inMountains) {
             dungeonTimer = 30;
-            rngValmin = 700;
-            rngValmax = 125;
-            genericRNG();
+            genericRNG(700,125);
             dungeonPower = rngVal;
         }
     }
 
     static void distanceFromExit() throws InterruptedException {
         if ((tempVal - dungeonExitX) > (playerPosX - dungeonExitX) || (tempVal2 - dungeonExitY) > (playerPosY - dungeonExitY))
-        {
-            System.out.println("Colder...");
-        }
-        else
-        {
-            System.out.println("Warmer...");
-        }
+         System.out.println("Colder...");
+        else System.out.println("Warmer...");
         if ((playerPosX - dungeonExitX) <= 5 || (playerPosY - dungeonExitY) <= 5)
-        {
-            System.out.println("Getting pretty warm...");
-        }
+        System.out.println("Getting pretty warm...");
         else if ((playerPosX - dungeonExitX) <= 2 && (playerPosY - dungeonExitY) <= 2)
-        {
-            System.out.println("Extremely warm...");
-        }
+        System.out.println("Extremely warm...");
+    
     }
     static void dungeonEnemySpawner() throws InterruptedException {
         if (inWildlands)
         {
-            rngValmin = 10;
-            rngValmax = 5;
-            genericRNG();
+            genericRNG(10,5);
             dungeonEnemies = rngVal;
         }
         else 
          {
-             rngValmin = 20;
-             rngValmax = 5;
-             genericRNG();
+             genericRNG(20,5);
              dungeonEnemies = rngVal;
           }
         for (int z = 0; z < dungeonEnemies; z++) {
@@ -137,12 +113,9 @@ public class Dungeon extends Combat {
             while (dEnemyPosX[z] <= 0 && dEnemyPosY[z] <= 0)
             //Hopefully stops enemy locations from changing...
             {
-                    rngValmin = 1;
-                    rngValmax = dungeonExitX - 1;
-                    genericRNG();
+                    genericRNG(1, dungeonExitX - 1);
                     dEnemyPosX[z] = rngVal;
-                    rngValmax = dungeonExitY  - 1;
-                    genericRNG();
+                    genericRNG(1, dungeonExitY - 1);
                     dEnemyPosY[z] = rngVal;
             }
             //Fills up the vacant spots where shelters should be
@@ -159,30 +132,20 @@ public class Dungeon extends Combat {
         System.out.println("You recover a bit of your strength.");
         tempVal = Math.round (playerHP/10);
         playerHP += tempVal;
-        if (playerHP > 250 + (level*25))
-        {
-            playerHP = 250 + (level*25);
-        }
+        if (playerHP > 250 + (level*25)) playerHP = 250 + (level*25);
     }
     static void dungeonPath() throws InterruptedException {
         if (inWildlands) {
-            rngValmin = 1;
-            rngValmax = 14;
-            genericRNG();
+            genericRNG(1,14);
             dungeonExitX = rngVal;
-            rngValmin = 1;
-            rngValmax = 20 - dungeonExitX;
-            genericRNG();
+            genericRNG(1, 20 - dungeonExitY);
             dungeonExitY = rngVal;
+// The idea is to make the exit max 20 turns away
         }
         else if (inMountains) {
-            rngValmin = 1;
-            rngValmax = 19;
-            genericRNG();
+            genericRNG(1,19);
             dungeonExitX = rngVal;
-            rngValmin = 2;
-            rngValmax = 25 - dungeonExitX;
-            genericRNG();
+            genericRNG(2, 25 - dungeonExitX);
             dungeonExitY = rngVal;
         }
     }
@@ -198,109 +161,92 @@ public class Dungeon extends Combat {
             }
             hasConfirmed = false;
             while (!hasConfirmed) {
-                if (answerType.contains("A") || answerType.contains("a")) {
+                switch (answerType) {
+               case "a":
+                case "A": {
                     playerPosX -= 1;
                     if (playerPosX < 0) {
                         System.out.println("You almost fall into a secret pit.");
                         playerPosX = (int) tempVal;
-                    } else {
-                        hasConfirmed = true;
-                    }
+                    } else {hasConfirmed = true; break;}
                 }
-                if (answerType.contains("D") || answerType.contains("d")) {
+                case "d":
+                case "D": 
+                {
                     playerPosX += 1;
                     if (playerPosX > dungeonExitX) {
                         System.out.println("You almost run into spikes.");
-                    } else {
-                        hasConfirmed = true;
-                    }
+                    } else { hasConfirmed = true; break; }
                 }
-                    if (answerType.equals("W") || answerType.equals("w")) {
+                case "w":
+                case "W":
+                    {
                         playerPosY += 1;
                         if (playerPosY > dungeonExitY) {
                             System.out.println("A dark voice starts chanting, so you figure it's best to turn around.");
                             playerPosY = (int) tempVal2;
-                        } else {
-                            hasConfirmed = true;
-                        }
-                    }
-                    if (answerType.equals("S") || answerType.equals("s")) {
+                        } else { hasConfirmed = true; break; }
+                     }
+                case "s": 
+                case "S": {
                         playerPosY = playerPosY - 1;
                         if (playerPosY < 0) {
                             System.out.println("You almost fell into a secret pit.");
                             playerPosY = playerPosY + 1;
                             playerPosY = (int) tempVal2;
-                        } else {
-                            hasConfirmed = true;
-                        }
+                        } else { hasConfirmed = true; break; }
                     }
                 }
             }
-
+}
 
 static void dungeonExit() throws InterruptedException {
     if (dungeonTimer - dungeonTurn != 0)
     {
         System.out.println("Through your might, you escaped!");
-        tempVal = playerexp;
-        playerexp += (dungeonPower*1.5);
-        System.out.println("You gained " + (playerexp - tempVal) + " exp!");
         tempVal = coin;
-        rngValmin = dungeonPower/4;
-        rngValmax = dungeonPower/2;
-        genericRNG();
+        genericRNG(dungeonPower/4, dungeonPower/2);
         coin += Math.round(rngVal);
         System.out.println("You gained " + (coin - tempVal) + "coins!");
-        playerPosX = dungeonTempVal;
-        playerPosY = dungeonTempVal2;
+        genericRNG(dungeonPower, (int)(dungeonPower*1.5));
+        tempVal = playerexp;
+        playerexp += rngVal;
+        System.out.println("You gained " + (playerexp - tempVal) + " exp!");
 }
-    else if (playerHP > 0) {
-        System.out.println("You ran out of time...");
-        dungeonPosX[dungeonTempVal] = -6;
-        dungeonPosY[dungeonTempVal2] = -6;
-        playerPosX = dungeonTempVal;
-        playerPosY = dungeonTempVal2;
-    }
-    else {
-        System.out.println("The horrors of the dungeon proved too much for you to handle...");
+    else if (playerHP > 0) System.out.println("You ran out of time...");
+    else System.out.println("The horrors of the dungeon proved too much for you to handle...");
         playerPosX = dungeonTempVal;
         playerPosY = dungeonTempVal2;
         dungeonPosX[dungeonTempVal] = -6;
         dungeonPosY[dungeonTempVal2] = -6;
-    }
 }
 
 static void dChestSpawner() throws InterruptedException {
     for (int b = 0; b == dnumofchest; b++) {
         // the if statement checks if the chest is on a enemy tile or a shop tile
         while (chestPosX[b] <= 0 || chestPosY[b] <= 0) {
-            rngValmin = 1;
-            rngValmax = dungeonExitX;
-            genericRNG();
+            genericRNG(1,dungeonExitX);
             chestPosX[b] = rngVal;
-            rngValmax = dungeonExitY;
-            genericRNG();
+            genericRNG(1, dungeonExitY);
             chestPosY[b] = rngVal;
         }
 }
 }
-     protected static void dungeonMusic(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-         dungeonSetFile(trackNum);
-         dungeonStartClip();
-         dungeonLoopClip();
+     protected static void dungeonMusic() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+         Music.dungeonSetFile(13);
+         Music.dungeonStartClip();
+         Music.dungeonLoopClip();
          musicPlaying = true;
      }
 
      protected static void dungeonStopMusic() throws LineUnavailableException, IOException {
-         if (dayMusic != null) {
-             dungeonStopClip();
+         if (Music.dayMusic != null) {
+             Music.dungeonStopClip();
              musicPlaying = false;
-         } else {
-             System.out.println("Clip is already stopped or not initialized.");
-         }
+         } else System.out.println("Clip is already stopped or not initialized.");
      }
      protected static void dungeonSoundEffect(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-         setFile(trackNum);
-         startClip();
+         Music.setFile(trackNum);
+         Music.startClip();
      }
 }
