@@ -55,7 +55,7 @@ public class Primary {
     protected static int smokeBombs = 0;
     protected static int cycloneStraws = 0;
     protected static int magmaWhistle = 0;
-    protected static double playerHP =  + (35*level);
+    protected static double playerHP = +(35 * level);
 
     protected static int coin = 0;
     //Money. Used to buy utility items as well as fast travel.
@@ -143,23 +143,23 @@ public class Primary {
     protected static double tempVal = 0;
     protected static double tempVal2 = 0;
 
-        /*
-     generic doubles for all random number generator needs
-    rngVal = the value created in the rng code
-    rngValmin = the minimum amount the code can create
-    rngValmax = the random number possibility
+    /*
+ generic doubles for all random number generator needs
+rngVal = the value created in the rng code
+rngValmin = the minimum amount the code can create
+rngValmax = the random number possibility
 
-    for example
+for example
 
-    rngValmin = 50
-    rngValmax = 50
+rngValmin = 50
+rngValmax = 50
 
-    this would create a value of 50 and a random number between 0 and a maximum of 50
+this would create a value of 50 and a random number between 0 and a maximum of 50
 
-    then these 2 values would be added together to form rngVal
+then these 2 values would be added together to form rngVal
 
-    which then can be pulled by another method.
-     */
+which then can be pulled by another method.
+ */
     protected static int answer = 0;
     protected static String answerType = "";
     protected static boolean isSnowing = false;
@@ -171,6 +171,7 @@ public class Primary {
     //Music
     protected static boolean musicPlaying = false;
     protected static int musicFile = -1;
+
     public static void main(String[] args) throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         for (int cnt = 0; cnt < enemyPosX.length; cnt++) {
             enemyPosX[cnt] = -2;
@@ -260,6 +261,7 @@ public class Primary {
         Combat.fight();
         ending();
     }
+
     // Mayowa.... why....
     //This was supposed to be less complicated than the 1st version...
     static void offenseTutorial() throws InterruptedException {
@@ -308,7 +310,7 @@ public class Primary {
 
     static void enemySpawner() {
         if (!isSnowing && day % 2 == 0) {
-            genericRNG(2,2);
+            genericRNG(2, 2);
             numofenemy += rngVal;
         }
         for (int z = 0; z < numofenemy; z++) {
@@ -319,12 +321,12 @@ public class Primary {
                 if (inWildlands) {
                     genericRNG(1, 24);
                     enemyPosX[z] = rngVal;
-                    genericRNG(1,24);
+                    genericRNG(1, 24);
                     enemyPosY[z] = rngVal;
                 } else if (inMountains) {
-                    genericRNG(25,25);
+                    genericRNG(25, 25);
                     enemyPosX[z] = rngVal;
-                    genericRNG(1,25);
+                    genericRNG(1, 25);
                     enemyPosY[z] = rngVal;
                 }
             }
@@ -333,8 +335,9 @@ public class Primary {
     }
 
     static void dungeonSpawner() {
-        /*if (day%5 == 0)*/{
-            genericRNG(10,4);
+        /*if (day%5 == 0)*/
+        {
+            genericRNG(10, 4);
             numofdungeons -= rngVal;
         }
         for (int z = 0; z < numofdungeons; z++) {
@@ -343,14 +346,14 @@ public class Primary {
             //Hopefully stops shelter locations from changing...
             {
                 if (inWildlands) {
-                    genericRNG(1,24);
+                    genericRNG(1, 24);
                     dungeonPosX[z] = rngVal;
-                    genericRNG(1,24);
+                    genericRNG(1, 24);
                     dungeonPosY[z] = rngVal;
                 } else if (inMountains) {
-                    genericRNG(25,25);
+                    genericRNG(25, 25);
                     dungeonPosX[z] = rngVal;
-                    genericRNG(1,24);
+                    genericRNG(1, 24);
                     dungeonPosY[z] = rngVal;
                 }
             }
@@ -365,6 +368,7 @@ public class Primary {
          */
 
     }
+
     static void shelterSpawner() {
         genericRNG(0, 3);
         numofshelters += rngVal;
@@ -381,7 +385,7 @@ public class Primary {
                 } else if (inMountains) {
                     genericRNG(25, 25);
                     shelterPosX[z] = rngVal;
-                    genericRNG(1,24);
+                    genericRNG(1, 24);
                     shelterPosY[z] = rngVal;
                 }
             }
@@ -424,9 +428,9 @@ public class Primary {
         for (int c = 0; c < numofchest; c++) {
             if (playerPosX == chestPosX[c] && playerPosY == chestPosY[c]) {
                 System.out.println("You've found a chest!");
-                genericRNG(1,3);
+                genericRNG(1, 3);
                 tempVal = rngVal;
-                genericRNG(50, (day*level)/4 + 25);
+                genericRNG(50, (day * level) / 4 + 25);
                 if (tempVal == 1) {
                     tempVal = weapondmg;
                     weapondmg += rngVal;
@@ -450,9 +454,9 @@ public class Primary {
     static void getSwordRNG() {
         genericRNG(95, 35);
         weapondmg += rngVal;
-        genericRNG(95,35);
+        genericRNG(95, 35);
         playerDefense += rngVal;
-        genericRNG(95,35);
+        genericRNG(95, 35);
         playerSpeed += rngVal;
     }
 
@@ -460,18 +464,18 @@ public class Primary {
         System.out.println("Sword? You're really basic.");
         weaponName = "Sword";
         getSwordRNG();
-        moveSet.put("Move 1","Forward Swipe");
-        moveSet.put("Move 2","Downward Slice");
-        moveSet.put("Move 3","Pommel");
-        moveSet.put("Move 4","Shove");
-        moveSet.put("Move 5","Thrust");
+        moveSet.put("Move 1", "Forward Swipe");
+        moveSet.put("Move 2", "Downward Slice");
+        moveSet.put("Move 3", "Pommel");
+        moveSet.put("Move 4", "Shove");
+        moveSet.put("Move 5", "Thrust");
         numofmoves = 5;
     }
 
     static void getShieldRNG() {
         genericRNG(65, 25);
         weapondmg += rngVal;
-        genericRNG(150,25);
+        genericRNG(150, 25);
         playerDefense += rngVal;
         genericRNG(120, 25);
         playerSpeed += rngVal;
@@ -491,9 +495,9 @@ public class Primary {
     static void getAxeRNG() {
         genericRNG(125, 50);
         weapondmg += rngVal;
-        genericRNG(65,30);
+        genericRNG(65, 30);
         playerSpeed += rngVal;
-        genericRNG(35,35);
+        genericRNG(35, 35);
         playerDefense += rngVal;
     }
 
@@ -508,7 +512,7 @@ public class Primary {
         moveSet.put("Move 5", "Skewer");
     }
 
-    protected static void skillTree() {
+    protected static void skillTree() throws InterruptedException {
         cost = 0;
         answerType = "";
         hasConfirmed = false;
@@ -727,8 +731,9 @@ public class Primary {
                         }
                         break;
                 }
-            }else if (weaponName.contains("Axe")) {
-                if (level > 1) System.out.println("0: Ultimate: Eradicate: Gives you better ignite for 5 turns, giving bonus burn,armor, and stun on moves with cc.");
+            } else if (weaponName.contains("Axe")) {
+                if (level > 1)
+                    System.out.println("0: Ultimate: Eradicate: Gives you better ignite for 5 turns, giving bonus burn,armor, and stun on moves with cc.");
                 if (level >= 3) System.out.println("1: Ignite: The next strike does burn damage.");
                 if (level >= 5) {
                     System.out.println("2: Overhead Cleave: Swings downward at your opponent, slowing the opponent on hit. ");
@@ -828,54 +833,22 @@ public class Primary {
             }
         }
     }
-    static void confirmMove() {
+
+    static void confirmMove() throws InterruptedException {
         System.out.println("Cost: " + cost);
         System.out.println("Press 1 to confirm you want " + answerType);
         playerResponse();
         boolean hasPrevious = false;
-        boolean moveNotUnlocked = true;
-        String tempString = "";
-        for (int v = 1; v < numofmoves + 1; v++) {
-            tempString = moveSet.get("Move " + v);
-            if (tempString.equals(answerType)) {
-                moveNotUnlocked = false;
-                break;
-            }
-        }
         if (answer == 1 && skillPoints >= cost) {
-            if (answerType.contains("2"))
-                for (tempVal = 0; tempVal < numofmoves; tempVal++) {
-                    moveSet.get("Move " + numofmoves);
-                    if (moveSet.containsValue(answerType)) {
-                        //They have the previous move, so they're ok to get the next one
-                        hasPrevious = true;
-                        break;
-                    }
-                }
-            if (hasPrevious && moveNotUnlocked || !answerType.contains("2") && moveNotUnlocked) {
-                numofmoves += 1;
-                if (!answerType.contains("2")) moveSet.put("Move " + numofmoves, answerType);
-                else {
-                    int x = answerType.indexOf("2");
-                    String tempString2 = answerType.substring(0, x);
-                    for (int v = 1; v < numofmoves + 1; v++) {
-                        tempString = moveSet.get("Move " + v);
-                        if (tempString.equals(answerType)) {
-                            moveSet.replace("Move " + v, tempString2, answerType);
-                            break;
-                        }
-                    }
-                }
-                skillPoints -= cost;
-                System.out.println("You have unlocked " + answerType);
-                answer = 0;
-            }
+            numofmoves += 1;
+            moveSet.put("Move " + numofmoves, answerType);
+            skillPoints -= cost;
+            System.out.println("You have unlocked " + answerType);
+            answer = 0;
         }
-            else if (!moveNotUnlocked) System.out.println("You already have this move.");
-         else if (!hasPrevious) System.out.println("You do not have the previous move, so you cannot get this.");
-         else if (skillPoints < cost) System.out.println("Not enough points.");
+      else if(skillPoints<cost)System.out.println("Not enough points.");
         else System.out.println("You did not confirm.");
-    }
+}
 
     static void playerLoadout() {
         boolean changingLoadout = true;
@@ -888,7 +861,7 @@ public class Primary {
             for (int count = 1; count < numofmoves + 1; count++) {
                 System.out.println("Move " + count + ": " + moveSet.get("Move " + count) + ".");
                 if (count == 5) System.out.println("---------------------------------------------------------------");
-                    //When the 5tb move is displayed, this line will also appear, shwoing that it's the last equipped move.
+                    //When the 5tb move is displayed, this line will also appear, showing that it's the last equipped move.
             }
             System.out.println("Select the move you want to swap out using its corresponding number.");
             playerResponse();
