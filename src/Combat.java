@@ -16,7 +16,6 @@ import java.io.IOException;
     // public Combat() {
      //     CombatUI = new combatUI();
     // }
-     protected static double enemyMaxHP;
 
      protected static int staminaRegenPaused = 0;
     protected static int eradicateTurns = 0;
@@ -69,16 +68,19 @@ import java.io.IOException;
     protected static boolean ignoresBlock = false;
 
      public static void fight() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-        Music music = new Music();
          if (moveSet.containsValue("Swap")) shieldHand = "D";
         else shieldHand = "";
-        genericRNG(1,2);
-        tempVal = Math.toIntExact(Math.round(rngVal));
-        combatMusic((int) tempVal);
+       if (day <= 99 ) {
+           genericRNG(1, 2);
+           tempVal = Math.toIntExact(Math.round(rngVal));
+           combatMusic((int) tempVal);
+       }
+       else combatMusic(2);
         clearConsole();
         decayImp -= 5;
         enemyTypeSelector();
-        startCombat();
+       if (day <= 100) startCombat();
+       else finalBattle();
         while (isFighting) {
             resetCombatVar();
             if (unactionableTurns >= 1) playerIsActionable = false;
@@ -167,7 +169,7 @@ import java.io.IOException;
         }
     }
 
-    static void enemyTypeSelector() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
+    static void enemyTypeSelector() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         if (inWildlands) {
 
             genericRNG(1,2);
@@ -250,11 +252,37 @@ import java.io.IOException;
                     break;
                 }
             }
+
+              if (inDungeon) {
+                  if (enemyName.contains("Sword")) {
+                      enemyHP += (double) Dungeon.dungeonPower/15;
+                      enemyDamage += (double) Dungeon.dungeonPower/3;
+                      enemySpeed += (double) Dungeon.dungeonPower/3;
+                      enemyDefense += (double) Dungeon.dungeonPower/3;
+                  }
+                  else if (enemyName.contains("Shield")) {
+                      enemyHP += (double) Dungeon.dungeonPower/12;
+                      enemyDamage += (double) Dungeon.dungeonPower/10;
+                      enemySpeed += (double) Dungeon.dungeonPower/3;
+                      enemyDefense += (double) Dungeon.dungeonPower/2;
+                  }
+                  else if (enemyName.contains("Bow")) {
+                      enemyHP += (double) Dungeon.dungeonPower/20;
+                      enemyDamage += (double) Dungeon.dungeonPower/2;
+                      enemySpeed += (double) Dungeon.dungeonPower/4;
+                      enemyDefense += (double) Dungeon.dungeonPower/4;
+                  }
+                  else if (enemyName.contains("Bear")) {
+                      enemyHP += (double) Dungeon.dungeonPower/17;
+                      enemyDamage += (double) Dungeon.dungeonPower/3;
+                      enemySpeed += (double) Dungeon.dungeonPower/4;
+                      enemyDefense += (double) Dungeon.dungeonPower/5;
+                  }
+              }
             //sound effects
 
             if (enemyName.contains("Sword")) combatSoundEffect(4);
             enemyPower = (enemyHP + enemyDamage + enemySpeed + enemyDefense) / 4;
-            enemyMaxHP = enemyHP;
     }
 
      static void turnLoop() throws InterruptedException {
@@ -293,10 +321,7 @@ import java.io.IOException;
             moveName = "Wait";
             hasConfirmedCombat = true;
         }
-        else
-        {
-            System.out.println("You did not confirm.");
-        }
+        else System.out.println("You did not confirm.");
     }
 
     static void playerMove() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
@@ -363,7 +388,7 @@ import java.io.IOException;
     }
     static void universalMoves() throws InterruptedException {
         //Right now it's only shove, but any move that's possible by any weapon will be listed here
-        if (moveName.contains("Shove")) {
+        if (tempMove.contains("Shove")) {
             moveName = tempMove;
             moveRange = 1;
             moveDamage = (attackDamage * 0.25) * (100 / (100 + enemyDefense));
@@ -412,7 +437,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Swings the sword forward, hitting anyone caught in the way.");
-                printMoveInfo(2,attackSpeed*0.75, "Medium");
+                printMoveInfo(2,0.75, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.75,2,0.5,"",0,0,0);
                 else hasConfirmedAtk = true;
@@ -423,7 +448,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Slashes at your opponent's legs.");
-                printMoveInfo( 2, attackSpeed*0.7, "Medium + ");
+                printMoveInfo( 2, 0.7, "Medium + ");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,0.65,"",0,0,0);
                 else hasConfirmedAtk = true;
@@ -435,14 +460,14 @@ import java.io.IOException;
                 }
                 System.out.println("Quickly smashes the hilt of your sword against your opponent.");
                 //(int range, double speed, String damageType,
-                printMoveInfo(1, attackSpeed, "Low");
+                printMoveInfo(1, 1, "Low");
                 playerResponse();
                 if (answer == 1) executeMove(1,2,0.35,"",0,0,0);
                 else hasConfirmedAtk = true;
             } else if (tempMove.contains("Shove")) {
                 System.out.println("Pushes the enemy backwards and creates some space.");
                 //(int range, double speed, String damageType,
-                printMoveInfo(1, attackSpeed*1.2, "Very Low");
+                printMoveInfo(1, 1.2, "Very Low");
                 playerResponse();
                 if (answer == 1) universalMoves();
                 else hasConfirmedAtk = true;
@@ -453,12 +478,12 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Dash forward and poke with the very edge of your sword.");
-                printMoveInfo(4, attackSpeed*0.4, "High");
+                printMoveInfo(4, 0.4, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.4,4,1.1,"",0,0,0);
                  else hasConfirmedAtk = true;
             } else if (tempMove.contains("Phantom Slash") && hasSuper) {
-                printMoveInfo(3, attackSpeed*1.2, "Extremely High");
+                printMoveInfo(3, 1.2, "Extremely High");
                 playerResponse();
                 if (answer == 1) {
                     tempVal2 = (attackDamage * 1.7);
@@ -491,7 +516,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Whirlwind: A giant swinging attack that deals massive stamina damage.");
-                printMoveInfo(3, attackSpeed*0.45, "High");
+                printMoveInfo(3, 0.45, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.5,3,0.9,"",0,0,0);
                 else hasConfirmedAtk = true;
@@ -503,7 +528,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Rising Upper: Moves forward and slashes upwards, knocking the opponent back.");
-                printMoveInfo(2, attackSpeed*0.6, "Medium");
+                printMoveInfo(2, 0.6, "Medium");
                 playerResponse();
                 if (answer == 1) {
             if (tempMove.contains("2")) answerType = "Boop, Stun";
@@ -518,7 +543,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Vanishing Strike: Teleport to a location and slash your opponent.");
-                printMoveInfo(1,attackSpeed*0.8, "Medium +");
+                printMoveInfo(1,0.8, "Medium +");
                 playerResponse();
                 if (answer == 1) {
                     System.out.println("Input new distance.");
@@ -588,7 +613,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Dash forward and tackle the opponent with your shield.");
-                printMoveInfo(2, attackSpeed*0.65, "Medium");
+                printMoveInfo(2, 0.65, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.65,2,0.55,"",0,0,0);
                  else hasConfirmedAtk = true;
@@ -599,7 +624,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Dash up and launch your opponent into the air with a powerful punch to the jaw.");
-                printMoveInfo(2, attackSpeed*0.65, "Medium");
+                printMoveInfo(2, 0.65, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.65,1,0.6,"Boop",0,0,0);
                 else hasConfirmedAtk = true;
@@ -610,16 +635,20 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Jump up and smash your shield against the ground,. Bonus damage if 2 spaces away.");
-                printMoveInfo(2,attackSpeed*0.7, "High");
+                printMoveInfo(2,0.7, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,1.1,"",0,0,0);
                 else hasConfirmedAtk = true;
             } else if (tempMove.contains("Shove")) {
                 staminaCost = 0;
                 System.out.println("Pushes the enemy back and creates some space.");
-                printMoveInfo(1, attackSpeed*1.2, "Very Low");
+                printMoveInfo(1, 1.2, "Very Low");
                 playerResponse();
-                if (answer == 1) universalMoves();
+                if (answer == 1) {
+                    universalMoves();
+                    hasConfirmedAtk = true;
+                    hasConfirmedCombat = true;
+                }
                 else hasConfirmedAtk = true;
             } else if (tempMove.contains("Shield Punch")) {
                 staminaCost = 40;
@@ -628,7 +657,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Punch the back of your shield, sending a shockwave that knocks enemies backwards and lowers their stamina.");
-                printMoveInfo(2, attackSpeed*0.6, "High");
+                printMoveInfo(2, 0.6, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.6,2,0.9,"Boop",0,25,0);
                 else hasConfirmedAtk = true;
@@ -639,13 +668,13 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Shield Sweep: Spin around, striking your opponents ankles, lowering their stamina heavily.");
-                printMoveInfo(2, attackSpeed*0.4, "Medium+");
+                printMoveInfo(2, 0.4, "Medium+");
                 playerResponse();
                 if (answer == 1) executeMove(0.4,2,0.7,"",0,65,0);
                 else hasConfirmedAtk = true;
             } else if (tempMove.contains("Earthquake") && hasSuper) {
                 System.out.println("Ultimate: Earthquake: Slams the shield into the ground, stunning the enemy.");
-                printMoveInfo(3, attackSpeed*0.65, "Extremely High");
+                printMoveInfo(3, 0.65, "Extremely High");
                 playerResponse();
                 if (answer == 1) {
                     executeMove(0.65,3,1.6,"",0,85,0);
@@ -669,7 +698,7 @@ import java.io.IOException;
                             break;
                         }
                         System.out.println("Tai Otoshi: Grabs the opponent, throwing them down to the ground. Ignores block.");
-                        printMoveInfo(1, attackSpeed*0.8, "High");
+                        printMoveInfo(1, 0.8, "High");
                         playerResponse();
                         if (answer == 1) executeMove(0.8,1,0.8,"",0,0,0);
                         else hasConfirmedAtk = true;
@@ -680,7 +709,7 @@ import java.io.IOException;
                             break;
                         }
                         System.out.println("Retreating Strike: Dodge backwards, before kicking your opponent.");
-                        printMoveInfo(3, attackSpeed*0.7, "Medium");
+                        printMoveInfo(3, 0.7, "Medium");
                         playerResponse();
                         if (answer == 1) executeMove(0.7,3,0.6,"",0,0,0);
                     }
@@ -717,7 +746,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Shield Toss: Spin around, striking your opponents ankles, lowering their stamina heavily.");
-                printMoveInfo(5, attackSpeed*0.6, "Medium (depends on distance)");
+                printMoveInfo(5, 0.6, "Medium (depends on distance)");
                 playerResponse();
                 if (answer == 1) {
                     hasShield = false;
@@ -761,7 +790,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Swings the axe forward, hitting anyone caught in the way.");
-                printMoveInfo(2, attackSpeed*0.7, "Medium");
+                printMoveInfo(2, 0.7, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,0.55,"",0,0,0);
                  else hasConfirmedAtk = true;
@@ -772,7 +801,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Plunges the blunt side of the axe into your opponent, doing major damage and knocking the enemy backwards.");
-                printMoveInfo(2, attackSpeed*0.6, "High");
+                printMoveInfo(2, 0.6, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.35,2,1.1,"Boop",2,0,0);
                  else hasConfirmedAtk = true;
@@ -783,14 +812,14 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Uses the axe like a knife for quick slashes.");
-                printMoveInfo(1, attackSpeed*0.8, "Medium");
+                printMoveInfo(1,0.8, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.8,1,0.7,"",0,0,0);
                  else hasConfirmedAtk = true;
 
             } else if (tempMove.contains("Shove")) {
                 System.out.println(" Pushes the enemy backwards and creates some space.");
-                printMoveInfo(1, attackSpeed*1.2, "Very Low");
+                printMoveInfo(1,1.2, "Very Low");
                 playerResponse();
                 if (answer == 1) universalMoves();
                  else hasConfirmedAtk = true;
@@ -801,7 +830,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Drags the opponent closer to you.");
-                printMoveInfo(3, attackSpeed*0.65, "Low+");
+                printMoveInfo(3, 0.65, "Low+");
                 playerResponse();
                 if (answer == 1) executeMove(0.65,3,0.4,"Suck", 1,0,0);
                  else hasConfirmedAtk = true;
@@ -837,7 +866,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Swings downward at your opponent, slowing the opponent on hit.");
-                printMoveInfo(2, attackSpeed*0.55, "High");
+                printMoveInfo(2, 0.55, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.55,2,0.8,"Weaken Speed", 2, 0, 0);
                 else hasConfirmedAtk = true;
@@ -848,11 +877,10 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println(" Bashes your opponent's head with the blunt side of the axe, lowering the opponent's damage.");
-                printMoveInfo(2, attackSpeed*0.6, "Medium");
+                printMoveInfo(2, 0.6, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.6,2,0.4,"Weaken Damage",2,0,0);
                  else hasConfirmedAtk = true;
-
             } else if (tempMove.contains("Pyroslash")) {
                 staminaCost = 35;
             if (staminaCost >= playerStamina ) {
@@ -862,7 +890,7 @@ import java.io.IOException;
             System.out.println("A slow flame wave that ignites the opponent on hit.");
             Thread.sleep(500);
             System.out.println("Press 1 to confirm, or press another to reselect.");
-            printMoveInfo(8, attackSpeed*0.6, "Medium");
+            printMoveInfo(8, 0.6, "Medium");
             playerResponse();
             if (answer == 1) {
                 moveName = "Pyroslash";
@@ -880,7 +908,7 @@ import java.io.IOException;
      protected static void printMoveInfo(int range, double speed, String damageType) throws InterruptedException {
          System.out.println(tempMove);
          System.out.println("Range: " + range);
-         System.out.println("Speed: " + Math.round(speed));
+         System.out.println("Speed: " + Math.round(attackSpeed*speed));
          System.out.println("Damage: " + damageType);
          System.out.println("Cost: " + staminaCost + "% Stamina");
          Thread.sleep(500);
@@ -889,10 +917,9 @@ import java.io.IOException;
 
      protected static void executeMove(double speed, int range, double damage, String crowdControl, int ccNum, int stamDMG, int playSFX) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         moveName = tempMove;
-        moveSpeed = attackSpeed*speed;
+        moveSpeed = speed;
         moveRange = range;
-        genericRNG((int) Math.round(damage*0.95), (int) Math.round(damage*1.05));
-        moveDamage = tempVal * (100/(100 + playerDefense));
+        moveDamage = (attackDamage*damage) *(100/(100 + attackDefense));
         CC += crowdControl;
         ccAmount = ccNum;
         playerStamina -= staminaCost;
@@ -908,7 +935,7 @@ import java.io.IOException;
          enemymoveName = tempMove;
          enemymoveSpeed = enemySpeed*speed;
         enemymoveRange = range;
-        enemymoveDamage = damage * (100/(100 + playerDefense));
+        enemymoveDamage = enemyDamage*damage * (100/(100 + playerDefense));
         enemyCC += crowdControl;
         enemyCCAmount = ccNum;
         enemyStamina -= staminaCost;
@@ -1318,9 +1345,12 @@ import java.io.IOException;
             playerexp += rngVal;
             System.out.println("You gained " + (playerexp - tempVal) + " experience!");
             //enemy goes to the shadow realm (aka the negative spots I put everything)
-            tempVal3 = Math.round(tempVal3);
-            enemyPosX[(int) tempVal3] = -2;
-            enemyPosY[(int) tempVal3] = -2;
+            for (int m = 0; m < enemyPosX.length; m++) {
+                if (playerPosX == enemyPosX[m] && playerPosY == enemyPosY[m]) {
+                    enemyPosX[m] = -30;
+                    enemyPosY[m] = -30;
+                }
+            }
             numofenemy -= 1;
         }
         System.out.println("-----------------------------------------------------------");
@@ -1346,7 +1376,6 @@ import java.io.IOException;
             if (moveName.contains("2")) {
                 moveSpeed = moveSpeed * 1.2;
                 CC += "Boop";
-                //This might actually be a nerf, but tbh i don't rlly know what to add to Ki Charge 2.
                 ccAmount = 1;
             }
             if (fightRange - moveRange == 0) {
@@ -1358,10 +1387,15 @@ import java.io.IOException;
         if (usedPyroslash) {
             pyroslashLocation += 1;
             if (pyroslashLocation >= fightRange) {
-                tempVal = enemyHP;
-                moveDamage = (attackDamage * 0.45) * (100 / (100 + enemyDefense));
-                enemyHP -= moveDamage;
-                System.out.println("The opponent was hit for " + (tempVal - enemyHP) + "by the Pyroslash!");
+                if (moveSet.containsValue("2")) {
+                    tempVal = enemyHP;
+                    moveDamage = (attackDamage * 0.45) * (100 / (100 + enemyDefense));
+                    enemyHP -= moveDamage;
+                    System.out.println("The opponent was hit for " + (tempVal - enemyHP) + "by the Pyroslash!");
+                }
+                CC += "DOT";
+                ccAmount += 1;
+                enemyStruck = true;
             }
         }
         //Pyroslash spawner
@@ -1378,9 +1412,7 @@ import java.io.IOException;
         if (eradicateTurns > 0) {
             isIgnited = true;
             //If your move already has DOT, you also get a stun. This might be broken tho............. but at the same time i haven't actually used a super as of May 25, 2023 lol.
-            if (CC.contains("DOT")) {
-                CC += "Stun";
-            }
+            if (CC.contains("DOT")) CC += "Stun";
             hasArmor = true;
         }
         //Movement options
@@ -1443,6 +1475,7 @@ import java.io.IOException;
                 playerStruck = true;
             }
             //if both speed and damage are somehow identical... I have no idea how that would ever happen but then no damage.
+            /* June 2nd Temi here, I've been playing for over 4 weeks and I've never seen the strength comparison, let alone this clash.  */
             else System.out.println("Clash! Both your speed and damage were identical!");
         }
         /*
@@ -1452,34 +1485,30 @@ import java.io.IOException;
         Cuz i want the multiplier to happen before the dmg reduction
         in case the enemy whiffed and wants to block
          */
-        if (playerIsAttacking) {
+        if (playerIsAttacking && !playerHasWhiffed && !enemyIsAttacking && moveSpeed > enemymoveSpeed) {
             if (enemyHasWhiffed)
             //Player stuff
             {
                 moveDamage *= 1.35;
                 System.out.println("Bonus damage because the opponent whiffed! ");
-                enemyStruck = true;
                 enemyWhiffedturns -= 1;
-            } else if (enemyIsBlocking) {
+            }  if (enemyIsBlocking) {
                 if (!ignoresBlock) {
                     moveDamage = moveDamage / 4;
                     System.out.println("The enemy blocked your attack!");
                     enemyStamina += staminaDamage;
                     combatSoundEffect(3);
                 } else System.out.println("You got past the enemy's block!");
-                enemyStruck = true;
             }
-            else enemyStruck = true;
-
+            enemyStruck = true;
         }
         //Enemy stuff
-        if (enemyIsAttacking) {
+        if (enemyIsAttacking && !enemyHasWhiffed && !playerIsAttacking && enemymoveSpeed > moveSpeed) {
             //Same thing for players, if they whiff and the opponent hits them they take 35% extra dmg
             if (playerHasWhiffed) {
                 tempVal = playerHP;
                 enemymoveDamage = (enemymoveDamage * 1.35);
                 System.out.println("Bonus damage because you whiffed!");
-                playerStruck = true;
             } else if (playerIsBlocking) {
                 enemymoveDamage = (enemymoveDamage / 4);
                 System.out.println("You blocked the enemy's attack!");
@@ -1487,21 +1516,20 @@ import java.io.IOException;
                 playerStamina += rngVal;
                 enemyStaminaDamage = enemyStaminaDamage / 2;
                 combatSoundEffect(3);
-                playerStruck = true;
-            } else playerStruck = true;
-
+            }
+            playerStruck = true;
         } else if (playerIsBlocking && enemyIsBlocking) System.out.println("Both fighters blocked! A tense standoff...");
 
+        //Code for if the other combatant doesn't do anything, just to make sure the move connects.
         if (playerIsAttacking && !enemyIsAttacking && !enemyHasWhiffed && !enemyIsBlocking && (moveRange >= fightRange)) enemyStruck = true;
+        if (enemyIsAttacking && (enemymoveRange >= fightRange) && !playerIsBlocking && !enemyHasWhiffed) playerStruck = true;
 
-          if (enemyStruck) playerStruck = false;
-          // i don't feel like debugging rn leave me alone who ever is reading this
+        //  if (enemyStruck) playerStruck = false;
+
         if (enemyStruck && !playerHasWhiffed) {
             //Sword sfx
             if (weaponName.contains("Sword") && !moveName.contains("Shove")) combatSoundEffect(8);
-
             if (weaponName.contains("Axe") && !moveName.contains("Shove")) combatSoundEffect(15);
-
             if (enemyIsAttacking) playercounterHit = true;
             /*
             Quick recap
@@ -1558,14 +1586,11 @@ import java.io.IOException;
                 //lets the player know that they landed the sweet spot
             superMeter += Math.round(moveDamage / 2.5);
             //Super meter builds with damage
-            if (superMeter >= 100) {
-                hasSuper = true;
-                superMeter = 100;
-            } else hasSuper = false;
-            // this is the Sword Mastery Perk (Sword charges give charge back on sweetspot hits)
+            if (superMeter >= 100) hasSuper = true;
+            else hasSuper = false;
+            // this is the Sword Mastery Perk (Sword charges gives charge on sweetspot hits)
             if (weaponName.contains("Sword") && masteredWeapon && hitTipper) swordCharged = true;
             if (moveName.contains("Cripple 2")) staminaRegenPaused = ccAmount;
-            //CombatUI.barFill("Enemy Health Bar");
         }
         if (playerStruck) {
             if (enemyName.contains("Sword") && !enemymoveName.contains("Block")) {
@@ -1587,10 +1612,7 @@ import java.io.IOException;
                 if (playerIsAttacking) enemycounterHit = true;
                 //same for enemies
                 if (enemycounterHit) playerStamina -= 20;
-                if (playerIsActionable && enemyStaminaDamage > 0) {
-                    playerStamina -= enemyStaminaDamage;
-                    //CombatUI.barFill("Stamina Bar");
-                }
+                if (playerIsActionable && enemyStaminaDamage > 0) playerStamina -= enemyStaminaDamage;
                 superMeter += Math.round(enemymoveDamage / 4);
                 tempVal = playerHP;
                 playerHP -= enemymoveDamage;
@@ -1616,10 +1638,7 @@ import java.io.IOException;
                         if (CC.contains("Weaken Speed")) attackSpeed = attackSpeed * ((double) 100 / (100 * ccAmount));
                     }
                 }
-            //CombatUI.barFill("Health Bar");
-            //CombatUI.barFill("Enemy Stamina Bar");
             }
-
         /*
         if either the player or the enemy ran out of stamina, they should
         be stunned for a turn.
@@ -1684,10 +1703,10 @@ import java.io.IOException;
         if (!hasGrapplingHook) {
             moveRange = 0;
         }
-        //can't go above 100 since its supposed to be a percentage, although maybe i'll add it for axe super?
-        //edit: maybe i should finish the game first.
+        //can't go above 100 since its supposed to be a percentage
         if (playerStamina > 100) playerStamina = 100;
         if (enemyStamina > 100) enemyStamina = 100;
+        if (superMeter > 100) superMeter = 100;
         staminaCost = 0;
         playerIsBlocking = false;
         enemyIsBlocking = false;
@@ -1716,20 +1735,22 @@ import java.io.IOException;
         Thread.sleep(1000);
         System.out.println("Thousands of people entered... only 2 remain.");
         Thread.sleep(1000);
+        //Determines the boss's starting stance.
         genericRNG(1,3);
-        if (rngVal == 1) bossIsSwordsman = true;
-        else if (rngVal == 2) bossIsShieldsman = true;
+        if (rngVal == 1) bossStance = "sword";
+        else if (rngVal == 2) bossStance = "shield";
         else {
-            bossIsBowman = true;
+            bossStance = "bow";
             enemyQuiver = 7;
         }
+        System.out.println("The enemy is using their " + bossStance + "!");
         isBoss = true;
-        enemyHP = 2500;
-        genericRNG(1750,150);
+        enemyHP = 1000;
+        genericRNG(1250,150);
         enemyDamage = rngVal;
-        genericRNG(1900,100);
+        genericRNG(950,100);
         enemySpeed = rngVal;
-        genericRNG(1500,500);
+        genericRNG(1050,100);
         enemyDefense = rngVal;
         enemyPower = (enemyHP + enemyDamage + enemySpeed + enemyDefense)/4;
         enemyName = "The Last";
@@ -1740,7 +1761,7 @@ import java.io.IOException;
         System.out.println("-----------------------------------------------------------");
     }
     static void BossAI() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-        if (enemyHP <= 1750 && enemyHP >= 1000 && bossHasSwapped == 0|| enemyHP <= 1000 && bossHasSwapped == 1) {
+        if (enemyHP <= 750 && enemyHP >= 500 && bossHasSwapped == 0|| enemyHP <= 300 && bossHasSwapped == 1) {
             answerType = bossStance;
             while (answerType.equals(bossStance)) {
                 genericRNG(1, 2);
@@ -1748,8 +1769,9 @@ import java.io.IOException;
                 else if (rngVal == 2) bossStance = "shield";
                 else bossStance = "bow";
             }
-        }
             System.out.println("The boss swaps to their " + bossStance + "!");
+            bossHasSwapped += 1;
+        }
         if (bossStance.contains("sword")) SwordsmanAI();
         else if (bossStance.contains("bow")) bowmanAI();
         else shieldsmanAI();

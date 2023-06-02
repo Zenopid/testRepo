@@ -11,13 +11,13 @@ public class Primary {
 
     static Scanner KB = new Scanner(System.in);
 
-  /*  public Primary() {
+  /*  public Primary()
         genericUI GenericUI = new genericUI();
     } */
 
     protected static int decayImp = 2;
     //imp stands for improve, this is to decrease gear improvement if used too much
-    protected static int level = 1;
+    protected static int level = 15;
     protected static int rngVal = 0;
 
     /*
@@ -34,17 +34,17 @@ public class Primary {
      */
 
     //Time and weather
-    protected static int day = 1;
+    protected static int day = 99;
     protected static int weather = 0;
 
     protected static boolean spentDay = false;
 
     // Gear and stats
     protected static int requiredXP = 100;
-    protected static int skillPoints = 0;
-    protected static double playerDefense = 0;
-    protected static double playerSpeed = 0;
-    protected static double weapondmg = 0;
+    protected static int skillPoints = 100;
+    protected static double playerDefense = 1000;
+    protected static double playerSpeed = 1000;
+    protected static double weapondmg = 1000;
     protected static double playerPower = 0;
     protected static boolean masteredWeapon = false;
     protected static boolean hasSuper = false;
@@ -55,7 +55,8 @@ public class Primary {
     protected static int smokeBombs = 0;
     protected static int cycloneStraws = 0;
     protected static int magmaWhistle = 0;
-    protected static double playerHP = 200 + (50* level);
+    protected static double playerHP =  + (35*level);
+
     protected static int coin = 0;
     //Money. Used to buy utility items as well as fast travel.
 
@@ -75,7 +76,7 @@ public class Primary {
     protected static int enemyStamina = 100;
     protected static int staminaDamage = 0;
     protected static int enemyStaminaDamage = 0;
-    protected static int superMeter = 0;
+    protected static int superMeter = 100;
     protected static boolean playerIsAttacking = false;
     protected static boolean playerHasWhiffed = false;
     protected static int playerWhiffedturns = 0;
@@ -102,9 +103,6 @@ public class Primary {
     protected static int turn = 1;
     protected static boolean isFighting;
     protected static boolean isBoss;
-    protected static boolean bossIsSwordsman;
-    protected static boolean bossIsBowman;
-    protected static boolean bossIsShieldsman;
     protected static String bossStance = "";
     protected static int bossHasSwapped = 0;
 
@@ -144,7 +142,7 @@ public class Primary {
     //Assorted Variables (Not specfic to any one aspect of the game)
     protected static double tempVal = 0;
     protected static double tempVal2 = 0;
-    protected static double tempVal3 = 0;
+
         /*
      generic doubles for all random number generator needs
     rngVal = the value created in the rng code
@@ -174,7 +172,6 @@ public class Primary {
     protected static boolean musicPlaying = false;
     protected static int musicFile = -1;
     public static void main(String[] args) throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
-        Music audio = new Music();
         for (int cnt = 0; cnt < enemyPosX.length; cnt++) {
             enemyPosX[cnt] = -2;
             enemyPosY[cnt] = -2;
@@ -187,12 +184,12 @@ public class Primary {
             dungeonPosX[cnt] = -7;
             dungeonPosY[cnt] = -7;
         }
-        enemyPosX[1] = 1;
-        enemyPosY[1] = 1;
-        shopPosX[1] = 2;
-        shopPosY[1] = 2;
-        dungeonPosX[1] = 3;
-        dungeonPosY[1] = 3;
+        enemyPosX[0] = 1;
+        enemyPosY[0] = 1;
+        shopPosX[0] = 2;
+        shopPosY[0] = 2;
+        dungeonPosX[0] = 3;
+        dungeonPosY[0] = 3;
         chestPosX[0] = 1;
         chestPosY[0] = 0;
         System.out.println("Major Project");
@@ -221,23 +218,9 @@ public class Primary {
             weatherEffects();
             if (playerHP <= 0) playerDied();
             spentDay = false;
-            Thread.sleep(1000);
             while (!spentDay) {
                 if (!musicPlaying) playMusic(0);
                 dayLoop();
-                for (int cnt3 = 0; cnt3 < shopPosX.length; cnt3++) {
-                    if (playerPosX == shopPosX[cnt3] && playerPosY == shopPosY[cnt3] && !isSnowing && !inDungeon) {
-                        System.out.println("You found a shop! Press 5 to go in!");
-                        onShop = true;
-                        underShelter = true;
-                        break;
-                    } else if (isSnowing && tempVal < -999) {
-                        System.out.println("You found a shop, but it seems like they're closed...");
-                        onShop = false;
-                        underShelter = true;
-                        tempVal = 2;
-                    } else onShop = false;
-                }
                 playerResponse();
                 switch (answer) {
                     case 2 -> {
@@ -258,23 +241,22 @@ public class Primary {
                         if (inMountains && onShop) {
                             playMusic(12);
                             advancedShop();
-                        } else if (onDungeon) Dungeon.undergroundExplore();
+                        } else if (onDungeon) {
+                            inDungeon = true;
+                            Dungeon.undergroundExplore();
+                        }
                     }
                     default -> upgradeGear();
                 }
             }
             playerPosChecker();
-            for (int m = 0; m < enemyPosX.length; m++) {
-                if (playerPosX == enemyPosX[m] && playerPosY == enemyPosY[m] && !inDungeon) {
-                    isFighting = true;
-                    stopMusic();
-                    Combat.fight();
-                }
-            }
             if (playerHP <= 0) playerDied();
             endOfDay();
         }
-        Combat.finalBattle();
+        stopMusic();
+        isFighting = true;
+        inWildlands = false;
+        inMountains = false;
         Combat.fight();
         ending();
     }
@@ -407,32 +389,44 @@ public class Primary {
         }
     }
 
-    static void playerPosChecker() {
+    static void playerPosChecker() throws LineUnavailableException, IOException, UnsupportedAudioFileException, InterruptedException {
         //Things to check for when the player is moving around
-        for (int cnt4 = 0; cnt4 < shelterPosX.length; cnt4++) {
-            if (playerPosX == shelterPosX[cnt4] && playerPosY == shelterPosY[cnt4]) {
-                System.out.println("You are under shelter.");
+        for (int cnt3 = 0; cnt3 < shopPosX.length; cnt3++) {
+            if (playerPosX == shopPosX[cnt3] && playerPosY == shopPosY[cnt3] && !isSnowing && !inDungeon) {
+                onShop = true;
                 underShelter = true;
                 break;
-            } else {
-                underShelter = false;
+            } else if (isSnowing && tempVal < -999) {
+                onShop = false;
+                underShelter = true;
+                tempVal = 2;
+            } else onShop = false;
+        }
+        for (int m = 0; m < enemyPosX.length; m++) {
+            if (playerPosX == enemyPosX[m] && playerPosY == enemyPosY[m] && !inDungeon) {
+                isFighting = true;
+                stopMusic();
+                Combat.fight();
             }
+        }
+        for (int cnt4 = 0; cnt4 < shelterPosX.length; cnt4++) {
+            if (playerPosX == shelterPosX[cnt4] && playerPosY == shelterPosY[cnt4]) {
+                underShelter = true;
+                break;
+            } else underShelter = false;
         }
         for (int m = 0; m < dungeonPosX.length; m++) {
             if (playerPosX == dungeonPosX[m] && playerPosY == dungeonPosY[m]) {
-                System.out.println("Press 5 to enter a dungeon. Great treasures await, but at a great risk...");
                 onDungeon = true;
                 break;
-            } else {
-                onDungeon = false;
-            }
+            } else onDungeon = false;
         }
         for (int c = 0; c < numofchest; c++) {
             if (playerPosX == chestPosX[c] && playerPosY == chestPosY[c]) {
                 System.out.println("You've found a chest!");
                 genericRNG(1,3);
                 tempVal = rngVal;
-                genericRNG((day*level)/2 + 25, 50);
+                genericRNG(50, (day*level)/4 + 25);
                 if (tempVal == 1) {
                     tempVal = weapondmg;
                     weapondmg += rngVal;
@@ -460,7 +454,6 @@ public class Primary {
         playerDefense += rngVal;
         genericRNG(95,35);
         playerSpeed += rngVal;
-
     }
 
     static void getSword() {
@@ -526,150 +519,134 @@ public class Primary {
             if (answer == 0) break;
             System.out.println(weaponName);
             if (weaponName.contains("Sword")) {
-                switch (level) {
-                    case 1:
-                        System.out.println("0: Ultimate: Phantom Slash: Strike faster than the eye can see, ignoring defense.");
-                    case 2:
-                    case 3:
-                        System.out.println("1: Ki Charge: Powers up the blade, giving you extra range, and bonus damage if spaced.");
-                        System.out.println("2: Whirlwind: A giant swinging attack.");
-                        System.out.println("3: Rising Upper: Moves forward and slashes upwards, knocking the opponent back.");
-                    case 4:
-                    case 5:
-                        System.out.println("4: Vanishing Strike: Teleport to a location and slash your opponent.");
-                        break;
-                    case 6: case 7:
-                    case 8:
-                        System.out.println("5: Ki Charge 2: Increases move speed as well as knocking the opponent back.");
-                        System.out.println("6: Whirlwind 2: Hits multiple times.");
-                        System.out.println("7: Rising Upper 2: Stuns the opponent, allowing for a follow-up attack.");
-                    case 9: System.out.println("8: Vanishing Strike 2: Deals bonus damage if it counter hits the opponent.");
-                    case 10: System.out.println("9: Sword Mastery: Landing hits with sweet-spot Ki Charge refunds the charge.");
-                    case 11:
-                    case 12:
-                        System.out.println("10: Phantom Slash 2: Deals bonus damage for every point of HP missing.");
-                        break;
-                    default:
-                        break;
+                if (level > 1) {
+                    System.out.println("0: Ultimate: Phantom Slash: Strike faster then the eye can see, ignoring defense.");
+                }
+                if (level >= 3) {
+                    System.out.println("1: Ki Charge: Powers up the blade, giving you extra range, and bonus damage if spaced.");
+                    System.out.println("2: Whirlwind: A giant swinging attack.");
+                    System.out.println("3: Rising Upper: Moves forward and slashes upwards, knocking the opponent back.");
+                    //  cost = 1;
+                }
+                if (level >= 5)
+                    System.out.println("4: Vanishing Strike: Teleport to a location and slash your opponent.");
+                //  cost = 2;
+                if (level >= 8) {
+                    System.out.println("5: Ki Charge 2: Increases move speed as well as knocking the opponent back.");
+                    System.out.println("6: Whirlwind 2: Hits multiple times.");
+                    System.out.println("7: Rising Upper 2: Stuns the opponent, allowing for a follow up attack. ");
+                    // cost = 2;
+                }
+                if (level >= 10) {
+                    System.out.println("8: Vanishing Strike 2: Deals bonus damage if it counter hits the opponent. ");
+                    //    cost = 3;
+                }
+                if (level >= 12) {
+                    System.out.println("9: Sword Mastery: Landing hits with sweet-spot Ki Charge refunds the charge.");
+                    //  cost = 4;
+                }
+                if (level >= 15) {
+                    System.out.println("10: Phantom Slash 2: Deals bonus damage for every point of HP missing.");
+                    // cost = 5;
                 }
                 playerResponse();
                 switch (answer) {
-                    case 0:
+                    case 0 -> {
                         if (level > 1) {
                             answerType = "Phantom Slash";
                             cost = 1;
                             confirmMove();
                         }
-                        break;
-                    case 1:
+                    }
+                    case 1 -> {
                         if (level >= 3) {
                             answerType = "Ki Charge";
                             cost = 1;
                             confirmMove();
                         }
-                        break;
-                    case 2:
+                    }
+                    case 2 -> {
                         if (level >= 3) {
                             answerType = "Whirlwind";
                             cost = 1;
                             confirmMove();
                         }
-                        break;
-                    case 3:
+                    }
+                    case 3 -> {
                         if (level >= 3) {
                             answerType = "Rising Upper";
                             cost = 1;
                             confirmMove();
                         }
-                        break;
-                    case 4:
+                    }
+                    case 4 -> {
                         if (level >= 5) {
                             answerType = "Vanishing Strike";
                             cost = 3;
                             confirmMove();
                         }
-                        break;
-                    case 5:
+                    }
+                    case 5 -> {
                         if (level >= 8) {
                             answerType = "Ki Charge 2";
                             cost = 2;
                             confirmMove();
                         }
-                        break;
-                    case 6:
+                    }
+                    case 6 -> {
                         if (level >= 8) {
                             answerType = "Whirlwind 2";
                             cost = 2;
                             confirmMove();
                         }
-                        break;
-                    case 7:
+                    }
+                    case 7 -> {
                         if (level >= 8) {
                             answerType = "Rising Upper 2";
                             cost = 2;
                             confirmMove();
                         }
-                        break;
-                    case 8:
+                    }
+                    case 8 -> {
                         if (level >= 10) {
                             answerType = "Vanishing Strike 2";
                             cost = 3;
                             confirmMove();
                         }
-                        break;
-                    case 9:
+                    }
+                    case 9 -> {
                         if (level >= 12) {
                             answerType = "Sword Mastery";
                             cost = 3;
                             confirmMove();
                         }
-                        break;
-                    case 10:
+                    }
+                    case 10 -> {
                         if (level >= 15) {
                             answerType = "Phantom Slash 2";
                             cost = 4;
                             confirmMove();
                         }
-                        break;
-                    default: System.out.println("Invalid response.");
-                        break;
+                    }
+                    default -> System.out.println("Invalid response.");
                 }
             } else if (weaponName.contains("Shield")) {
-                switch (level) {
-                    case 1:
-                        System.out.println("0: Ultimate: Earthquake: Slams the shield into the ground, stunning the enemy.");
-                        break;
-                    case 2:
-                    case 3:
-                        System.out.println("1: Shield Sweep: Spin around, striking your opponents ankles.");
-                        System.out.println("2: Swap Hands: Off hand: Deals bonus damage. Dominant hand: Increased speed.");
-                        System.out.println("3: Deflect: Parries the opponent's strike, stunning them.");
-                    case 4:
-                    case 5:
-                        System.out.println("4: Shield Toss: Throw your shield like a projectile.");
-                    case 6:
-                    case 7:
-                    case 8:
-                        System.out.println("5: Shield Sweep 2: Has vacuum.");
-                        System.out.println("6: Swap Hands 2: Gives access to Retreating Strike in dominant, and Tai Otoshi in off hand.");
-                        System.out.println("Retreating Strike: Dodge backwards, before kicking your opponent.");
-                        System.out.println("Tai Otoshi: Grabs the opponent, throwing them down to the ground. Ignores block. ");
-                        System.out.println("7: Deflect 2: Deals 25% of the opponent's damage as well.");
-                    case 9:
-                    case 10:
-                        System.out.println("8: Shield Toss 2: Get the shield back on successful hit, and do bonus damage with your next strike.");
-                    case 11:
-                    case 12:
-                        System.out.println("9: Shield Mastery: Take reduced damage on moves that involve your shield.");
-                    case 13:
-                    case 14:
-                    case 15:
-                        System.out.println("10: Ultimate: Earthquake 2: The next attack deals bonus damage.");
-                        break;
-                    default:
-                        break;
+                if (level > 1)
+                    System.out.println("0: Ultimate: Earthquake: Slams the shield into the ground, stunning the enemy.");
+                if (level >= 3) {
+                    System.out.println("1: Shield Sweep: Spin around, striking your opponents ankles.");
+                    System.out.println("2: Swap Hands: Off hand: Deals bonus damage. Dominant hand: Increased speed.");
+                    System.out.println("3: Deflect: Parries the opponent's strike, stunning them.");
                 }
-                playerResponse();
+                if (level >= 5) System.out.println("4: Shield Toss: Throw your shield like a projectile.");
+                if (level >= 8) System.out.println("7: Deflect 2: Deals 25% of the opponent's damage as well.");
+                if (level >= 10) {
+                    System.out.println("8: Shield Toss 2: Get the shield back on successful hit, and do bonus damage with your next strike.");
+                    System.out.println("8: Shield Toss 2: Get the shield back on successful hit, and do bonus damage with your next strike.");
+                }
+                if (level >= 12)
+                    System.out.println("9: Shield Mastery: Take reduced damage on moves that involve your shield.");
+                if (level >= 15) System.out.println("10: Ultimate: Earthquake 2: The next attack deals bonus damage.");
                 playerResponse();
                 switch (answer) {
                     case 0:
@@ -750,34 +727,24 @@ public class Primary {
                         }
                         break;
                 }
-            }
-            else if (weaponName.contains("Axe")) {
-                switch (level) {
-                    case 1: System.out.println("0: Ultimate: Eradicate: Gives you better ignite for 5 turns, giving bonus burn,armor, and stun on moves with cc.");
-                    case 2:
-                    case 3: System.out.println("1: Ignite: The next strike does burn damage.");
-                    case 4:
-                    case 5: {
+            }else if (weaponName.contains("Axe")) {
+                if (level > 1) System.out.println("0: Ultimate: Eradicate: Gives you better ignite for 5 turns, giving bonus burn,armor, and stun on moves with cc.");
+                if (level >= 3) System.out.println("1: Ignite: The next strike does burn damage.");
+                if (level >= 5) {
                     System.out.println("2: Overhead Cleave: Swings downward at your opponent, slowing the opponent on hit. ");
                     System.out.println("3: Cripple: Bashes your opponent's head with the blunt side of the axe, lowering the opponent's damage.");
                     System.out.println("4: Pyro-slash: A slow flame wave that ignites the opponent on hit.");
                 }
-                    case 6:
-                    case 7:
-                    case 8: System.out.println("5:Ignite 2: Burn damage now heals you.");
-                    case 9:
-                    case 10: {
+                if (level >= 8) System.out.println("5: Ignite 2: Burn damage now heals you.");
+                if (level >= 10) {
                     System.out.println("6: Overhead Cleave 2: Stuns on ignited opponents.");
                     System.out.println("7: Cripple 2: Prevents the opponent from regaining stamina.");
                     System.out.println("8: Pyro-slash 2: Deals impact damage.");
-                }   case 11:
-                    case 12: System.out.println("9: Axe Mastery: All moves ignite on counter hit. If already ignited, stun.");
-                    case 13:
-                    case 14:
-                    case 15: System.out.println("10: Ultimate: Eradicate 2: Ignite stacks, increasing the damage for every successful hit.");
-                    break;
-                    default: break;
-            }
+                }
+                if (level >= 12)
+                    System.out.println("9: Axe Mastery: All moves ignite on counter hit. If already ignited, stun.");
+                if (level >= 15)
+                    System.out.println("10: Ultimate: Eradicate 2: Ignite stacks, increasing the damage for every successful hit.");
                 playerResponse();
                 switch (answer) {
                     case 0:
@@ -861,12 +828,20 @@ public class Primary {
             }
         }
     }
-
     static void confirmMove() {
         System.out.println("Cost: " + cost);
         System.out.println("Press 1 to confirm you want " + answerType);
         playerResponse();
         boolean hasPrevious = false;
+        boolean moveNotUnlocked = true;
+        String tempString = "";
+        for (int v = 1; v < numofmoves + 1; v++) {
+            tempString = moveSet.get("Move " + v);
+            if (tempString.equals(answerType)) {
+                moveNotUnlocked = false;
+                break;
+            }
+        }
         if (answer == 1 && skillPoints >= cost) {
             if (answerType.contains("2"))
                 for (tempVal = 0; tempVal < numofmoves; tempVal++) {
@@ -877,14 +852,28 @@ public class Primary {
                         break;
                     }
                 }
-            if (hasPrevious || !answerType.contains("2")) {
+            if (hasPrevious && moveNotUnlocked || !answerType.contains("2") && moveNotUnlocked) {
                 numofmoves += 1;
-                moveSet.put("Move " + numofmoves, answerType);
+                if (!answerType.contains("2")) moveSet.put("Move " + numofmoves, answerType);
+                else {
+                    int x = answerType.indexOf("2");
+                    String tempString2 = answerType.substring(0, x);
+                    for (int v = 1; v < numofmoves + 1; v++) {
+                        tempString = moveSet.get("Move " + v);
+                        if (tempString.equals(answerType)) {
+                            moveSet.replace("Move " + v, tempString2, answerType);
+                            break;
+                        }
+                    }
+                }
                 skillPoints -= cost;
                 System.out.println("You have unlocked " + answerType);
                 answer = 0;
-            } else System.out.println("You do not have the previous move, so you cannot get this.");
-        } else if (skillPoints < cost) System.out.println("Not enough points.");
+            }
+        }
+            else if (!moveNotUnlocked) System.out.println("You already have this move.");
+         else if (!hasPrevious) System.out.println("You do not have the previous move, so you cannot get this.");
+         else if (skillPoints < cost) System.out.println("Not enough points.");
         else System.out.println("You did not confirm.");
     }
 
@@ -954,11 +943,12 @@ public class Primary {
                 }
             }
         }
+        /*
         for (int h = 0; h < chestPosX.length; h++) {
             if (chestPosX[h] > 0 && chestPosY[h] > 0)
                 System.out.println("Chest at (" + chestPosX[h] + "," + chestPosY[h] + ").");
-
         }
+         */
     }
 
     static void shopSpawner() {
@@ -1003,6 +993,7 @@ public class Primary {
     }
 
     static void dayLoop() {
+        //Prints out day info
         System.out.println("Number of enemies: " + numofenemy);
         playerPower = (playerHP + weapondmg + playerDefense + playerSpeed) / 4;
         System.out.println("Your hp: " + Math.round(playerHP));
@@ -1020,6 +1011,9 @@ public class Primary {
         System.out.println("2: Explore");
         System.out.println("3: Skill Tree");
         System.out.println("4: Change Loadout");
+        if (onShop && !isSnowing) System.out.println("You found a shop! Press 5 to go in!");
+        else if (onShop && isSnowing) System.out.println("You found a shop, but it looks like they're closed...");
+        else if (onDungeon) System.out.println("You found a dungeon! Press 5 to go in! \nGreat treasures await, but at great risk...");
     }
     static void playerDied() {
         System.out.println("You were knocked out. The hours turn into days as you regain your strength...");
@@ -1506,7 +1500,7 @@ public class Primary {
             if (coin >= exchangeRate) {
                 coin -= exchangeRate;
                 playerHP += improveRate;
-                if (playerHP > 200 + (50*level)) playerHP = 200 + (50*level);
+                if (playerHP > 75 + (35*level)) playerHP = 75 + (35*level);
                if (inWildlands) System.out.println("Please continue throwing your life away, it brings me profit.");
                else if (inMountains) System.out.println("Let's hope you last a bit longer next time.");
             } else if (inWildlands) System.out.println("You're too poor. You can stop bleeding on my carpet now.");
@@ -1571,7 +1565,7 @@ public class Primary {
             else { while (playerPosX > 25) playerPosX -= 1;}
         }
         playerHP += (playerHP/10);
-        if (playerHP > 200 + (50*level)) playerHP = 200 + (50*level);
+        if (playerHP > 75 + (35*level)) playerHP = 75 + (35*level);
         day += 1;
     }
     static void upgradeGear() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
@@ -1579,8 +1573,11 @@ public class Primary {
             //Can't let decayImp make the increase 0 or less
         genericRNG(1,6);
         int x = rngVal;
-        if (inWildlands) genericRNG((day*level)/2 + 20, -(decayImp));
-        else if (inMountains) genericRNG((int) (1.25*(day*level))/2 + 25, -(decayImp));
+        if (inWildlands) genericRNG(-(decayImp), (20*level) + (day));
+        else if (inMountains) genericRNG(-(decayImp),(25*level) + day);
+        rngVal = Math.max(5, rngVal);
+        if (Math.max(5,rngVal) == 5) System.out.println("Your hand grows tired fom the constant work...");
+        //prevents stats from decreasing
         switch (x) {
             case 1:
             case 2: {
@@ -1710,13 +1707,14 @@ public class Primary {
             if (answer == 2) System.out.println("You are banished from the kingdom.");
             else System.out.println("You are now the wealthiest man in Zenotopia.");
             System.out.println("Congratulations!");
+        }
             Thread.sleep(1000);
-            playerPower = (weapondmg + playerDefense + playerSpeed + (level * 250));
-            System.out.println("You ended the game with a power level of " + playerPower + ".");
+            playerPower = (weapondmg + playerDefense + playerSpeed + 200 + (level*50));
+            System.out.println("You ended the game with a power level of " + Math.round(playerPower) + ".");
             Thread.sleep(1000);
             System.out.println("You had " + coin + " coins.");
             Thread.sleep(1000);
-            System.out.println("You defeated + " + numOfEnemiesDefeated + " enemies.");
+            System.out.println("You defeated " + numOfEnemiesDefeated + " enemies.");
             Thread.sleep(1000);
             System.out.println("Made by Temi Awosiyan.");
             System.out.println("Sources:");
@@ -1727,24 +1725,26 @@ public class Primary {
             System.out.println("Gear improve sfx: https://www.youtube.com/watch?v=xcDVBwaI-V0&ab_channel=SoundEffectsArchive");
             System.out.println("Fire sfx: https://mixkit.co/free-sound-effects/fire/");
             System.out.println("All music made by me in Garageband using Apple Royality Free Music.");
-        }
     }
     /*
     The following methods are all music.
      */
     protected static void playMusic(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        Music.setFile(trackNum);
-        Music.startClip();
-        Music.loopClip();
+        Music audio = new Music();
+        audio.setFile(trackNum);
+        audio.startClip();
+        audio.loopClip();
         musicPlaying = true;
     }
     protected static void stopMusic() throws LineUnavailableException, IOException {
-        Music.stopClip();
+        Music audio = new Music();
+        audio.stopClip();
         musicPlaying = false;
     }
     protected static void soundEffect(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        Music.setFile(trackNum);
-        Music.startClip();
+        Music audio = new Music();
+        audio.setFile(trackNum);
+        audio.startClip();
     }
     protected static void resetMusic() {
         Music.dayMusic.setMicrosecondPosition(0);
@@ -1752,11 +1752,3 @@ public class Primary {
 
 
 }
-    //Combat will come soon...
-//Combat is almost here...
-//Combat is here(?)...
-//COMBAT IS HERE (for axe.... and only against weakswordsman)
-//COMBAT IS HERE (for wildlands and base weapon set)
-//COMBAT IS HERE (Mountains included!)
-//COMBAT IS HERE! but its broken rn cuz of stamina
-//combat 2.0 is here! with music, stamina, and extra moves!
