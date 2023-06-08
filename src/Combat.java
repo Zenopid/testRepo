@@ -43,6 +43,8 @@ import java.io.IOException;
     protected static String tempMove = "";
   
     protected static String CC = "";
+    
+    protected static String moveDescription = "";
 
     //Armor checker,lets you still hit the opponent even if your move was slower or weaker.
     protected static boolean hasArmor = false;
@@ -104,6 +106,9 @@ import java.io.IOException;
                         break;
                         case 4:
                         utilityItem();
+                        break;
+                        case 6:
+                        winButton();
                         break;
                         default:
                         playerWait();
@@ -303,6 +308,7 @@ import java.io.IOException;
         System.out.println("3: Block ");
         System.out.println("4: Utility Items");
         System.out.println("5: Wait ");
+        System.out.println("6: Win Button");
         playerHasWhiffed = false;
         enemyHasWhiffed = false;
         playerIsBlocking = false;
@@ -401,6 +407,7 @@ import java.io.IOException;
     playerStamina -= staminaCost;
         }
     }
+    
     static void swordSelection() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         /* Sword Movelist:
         Forward Swipe
@@ -437,6 +444,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Swings the sword forward, hitting anyone caught in the way.");
+                moveDescription = "Swings the sword forward, hitting anyone caught in the way.";
                 printMoveInfo(2,0.75, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.75,2,0.5,"",0,0,0);
@@ -448,6 +456,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Slashes at your opponent's legs.");
+                moveDescription = "Slashes at your opponent's legs.";
                 printMoveInfo( 2, 0.7, "Medium + ");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,0.65,"",0,0,0);
@@ -459,6 +468,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Quickly smashes the hilt of your sword against your opponent.");
+                moveDescription = "Quickly smashes the hilt of your sword against your opponent.";
                 //(int range, double speed, String damageType,
                 printMoveInfo(1, 1, "Low");
                 playerResponse();
@@ -466,6 +476,7 @@ import java.io.IOException;
                 else hasConfirmedAtk = true;
             } else if (tempMove.contains("Shove")) {
                 System.out.println("Pushes the enemy backwards and creates some space.");
+                moveDescription = "Pushes the enemy backwards and creates some space.";
                 //(int range, double speed, String damageType,
                 printMoveInfo(1, 1.2, "Very Low");
                 playerResponse();
@@ -478,6 +489,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Dash forward and poke with the very edge of your sword.");
+                moveDescription = "Dash forward and poke with the very edge of your sword.";
                 printMoveInfo(4, 0.4, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.4,4,1.1,"",0,0,0);
@@ -498,7 +510,8 @@ import java.io.IOException;
             } else if (tempMove.contains("Phantom Slash") && !hasSuper) System.out.println("You don't have your super yet.");
             else if (tempMove.contains("Ki Charge")) {
                 staminaCost = 0;
-                System.out.println("Ki Charge: Powers up the blade, giving you extra range, and bonus damage if spaced.");
+                System.out.println("Powers up the blade, giving you extra range, and bonus damage if spaced.");
+                moveDescription = "Powers up the blade, giving you extra range, and bonus damage if spaced.";
                 printMoveInfo(0,0, "N.A");
                 playerResponse();
                 if (answer == 1) {
@@ -515,7 +528,7 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Whirlwind: A giant swinging attack that deals massive stamina damage.");
+                System.out.println("A giant swinging attack that deals massive stamina damage.");
                 printMoveInfo(3, 0.45, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.5,3,0.9,"",0,0,0);
@@ -527,12 +540,13 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Rising Upper: Moves forward and slashes upwards, knocking the opponent back.");
+                System.out.println("Moves forward and slashes upwards, knocking the opponent back.");
+                moveDescription = "Moves forward and slashes upwards, knocking the opponent back.";
                 printMoveInfo(2, 0.6, "Medium");
                 playerResponse();
                 if (answer == 1) {
-            if (tempMove.contains("2")) answerType = "Boop, Stun";
-            else answerType = "Boop";
+            if (tempMove.contains("2")) CC = "Boop, Stun";
+            else CC = "Boop";
             executeMove(0.6,2,0.7,answerType,0,0, 0);
                 } else hasConfirmedAtk = true;
             }
@@ -542,7 +556,8 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Vanishing Strike: Teleport to a location and slash your opponent.");
+                System.out.println("Teleport to a location and slash your opponent.");
+                moveDescription = "Teleport to a location and slash your opponent.";
                 printMoveInfo(1,0.8, "Medium +");
                 playerResponse();
                 if (answer == 1) {
@@ -613,6 +628,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Dash forward and tackle the opponent with your shield.");
+                moveDescription = "Dash forward and tackle the opponent with your shield.";
                 printMoveInfo(2, 0.65, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.65,2,0.55,"",0,0,0);
@@ -624,6 +640,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Dash up and launch your opponent into the air with a powerful punch to the jaw.");
+                moveDescription = "Dash up and launch your opponent into the air with a powerful punch to the jaw.";
                 printMoveInfo(2, 0.65, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.65,1,0.6,"Boop",0,0,0);
@@ -635,6 +652,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Jump up and smash your shield against the ground,. Bonus damage if 2 spaces away.");
+                moveDescription = "Jump up and smash your shield against the ground,. Bonus damage if 2 spaces away.";
                 printMoveInfo(2,0.7, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,1.1,"",0,0,0);
@@ -642,6 +660,7 @@ import java.io.IOException;
             } else if (tempMove.contains("Shove")) {
                 staminaCost = 0;
                 System.out.println("Pushes the enemy back and creates some space.");
+                moveDescription = "Pushes the enemy back and creates some space.";
                 printMoveInfo(1, 1.2, "Very Low");
                 playerResponse();
                 if (answer == 1) {
@@ -657,6 +676,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Punch the back of your shield, sending a shockwave that knocks enemies backwards and lowers their stamina.");
+                moveDescription = "Punch the back of your shield, sending a shockwave that knocks enemies backwards and lowers their stamina.";
                 printMoveInfo(2, 0.6, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.6,2,0.9,"Boop",0,25,0);
@@ -667,13 +687,15 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Shield Sweep: Spin around, striking your opponents ankles, lowering their stamina heavily.");
+                System.out.println("Spin around, striking your opponents ankles, lowering their stamina heavily.");
+                moveDescription = "Spin around, striking your opponents ankles, lowering their stamina heavily.";
                 printMoveInfo(2, 0.4, "Medium+");
                 playerResponse();
                 if (answer == 1) executeMove(0.4,2,0.7,"",0,65,0);
                 else hasConfirmedAtk = true;
             } else if (tempMove.contains("Earthquake") && hasSuper) {
-                System.out.println("Ultimate: Earthquake: Slams the shield into the ground, stunning the enemy.");
+                System.out.println("Ultimate: Slams the shield into the ground, stunning the enemy.");
+                moveDescription = "Ultimate: Slams the shield into the ground, stunning the enemy.";
                 printMoveInfo(3, 0.65, "Extremely High");
                 playerResponse();
                 if (answer == 1) {
@@ -697,7 +719,9 @@ import java.io.IOException;
                             System.out.println("Not enough stamina.");
                             break;
                         }
-                        System.out.println("Tai Otoshi: Grabs the opponent, throwing them down to the ground. Ignores block.");
+                        System.out.println("Grabs the opponent, throwing them down to the ground. Ignores block.");
+                        moveDescription = "Grabs the opponent, throwing them down to the ground. Ignores block.";
+                        moveName = "Tai Otoshi";
                         printMoveInfo(1, 0.8, "High");
                         playerResponse();
                         if (answer == 1) executeMove(0.8,1,0.8,"",0,0,0);
@@ -708,7 +732,9 @@ import java.io.IOException;
                             System.out.println("Not enough stamina.");
                             break;
                         }
-                        System.out.println("Retreating Strike: Dodge backwards, before kicking your opponent.");
+                        System.out.println("Dodge backwards, before kicking your opponent.");
+                        moveDescription = "Dodge backwards, before kicking your opponent.";
+                        moveName = "Retreating Strike";
                         printMoveInfo(3, 0.7, "Medium");
                         playerResponse();
                         if (answer == 1) executeMove(0.7,3,0.6,"",0,0,0);
@@ -733,7 +759,8 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Deflect: Parries the opponent's strike, stunning them");
+                System.out.println("Parries the opponent's strike, stunning them.");
+                moveDescription = "Parries the opponent's strike, stunning them.";
                 printMoveInfo(0,0,"N.A");
                 playerResponse();
                 if (answer == 1) executeMove(0.8,2,0,"",0,0,0);
@@ -745,7 +772,8 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Shield Toss: Spin around, striking your opponents ankles, lowering their stamina heavily.");
+                System.out.println("Spin around, striking your opponents ankles, lowering their stamina heavily.");
+                moveDescription = "Spin around, striking your opponents ankles, lowering their stamina heavily.";
                 printMoveInfo(5, 0.6, "Medium (depends on distance)");
                 playerResponse();
                 if (answer == 1) {
@@ -790,6 +818,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Swings the axe forward, hitting anyone caught in the way.");
+                moveDescription = "Swings the axe forward, hitting anyone caught in the way.";
                 printMoveInfo(2, 0.7, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,0.55,"",0,0,0);
@@ -801,6 +830,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Plunges the blunt side of the axe into your opponent, doing major damage and knocking the enemy backwards.");
+                moveDescription = "Plunges the blunt side of the axe into your opponent, doing major damage and knocking the enemy backwards.";
                 printMoveInfo(2, 0.6, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.35,2,1.1,"Boop",2,0,0);
@@ -812,13 +842,15 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Uses the axe like a knife for quick slashes.");
+                moveDescription = "Uses the axe like a knife for quick slashes.";
                 printMoveInfo(1,0.8, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.8,1,0.7,"",0,0,0);
                  else hasConfirmedAtk = true;
 
             } else if (tempMove.contains("Shove")) {
-                System.out.println(" Pushes the enemy backwards and creates some space.");
+                System.out.println("Pushes the enemy backwards and creates some space.");
+                moveDescription = "Pushes the enemy backwards and creates some space.";
                 printMoveInfo(1,1.2, "Very Low");
                 playerResponse();
                 if (answer == 1) universalMoves();
@@ -835,7 +867,8 @@ import java.io.IOException;
                 if (answer == 1) executeMove(0.65,3,0.4,"Suck", 1,0,0);
                  else hasConfirmedAtk = true;
             } else if (tempMove.contains("Eradicate") && hasSuper) {
-                System.out.println("Ultimate: Eradicate: Gives you better ignite for 5 turns, giving bonus burn,armor, as well as stun on moves with cc.");
+                System.out.println("Ultimate: Gives you better ignite for 5 turns, giving bonus burn,armor, as well as stun on moves with cc.");
+                moveDescription = "Ultimate: Gives you better ignite for 5 turns, giving bonus burn,armor, as well as stun on moves with cc.";
                 printMoveInfo(0,0, "N.A");
                 playerResponse();
                 if (answer == 1) {
@@ -848,6 +881,7 @@ import java.io.IOException;
                 } else hasConfirmedAtk = true;
             } else if (tempMove.contains("Ignite")) {
                 System.out.println("The next strike does burn damage.");
+                moveDescription = "The next strike does burn damage.";
                 printMoveInfo(0,0, "N.A");
                 playerResponse();
                 if (answer == 1) {
@@ -866,6 +900,7 @@ import java.io.IOException;
                     break;
                 }
                 System.out.println("Swings downward at your opponent, slowing the opponent on hit.");
+                moveDescription = "Swings downward at your opponent, slowing the opponent on hit.";
                 printMoveInfo(2, 0.55, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.55,2,0.8,"Weaken Speed", 2, 0, 0);
@@ -876,7 +911,8 @@ import java.io.IOException;
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println(" Bashes your opponent's head with the blunt side of the axe, lowering the opponent's damage.");
+                System.out.println("Bashes your opponent's head with the blunt side of the axe, lowering the opponent's damage.");
+                moveDescription = "Bashes your opponent's head with the blunt side of the axe, lowering the opponent's damage.";
                 printMoveInfo(2, 0.6, "Medium");
                 playerResponse();
                 if (answer == 1) executeMove(0.6,2,0.4,"Weaken Damage",2,0,0);
@@ -888,6 +924,7 @@ import java.io.IOException;
                 break;
             }
             System.out.println("A slow flame wave that ignites the opponent on hit.");
+            moveDescription = "A slow flame wave that ignites the opponent on hit.";
             Thread.sleep(500);
             System.out.println("Press 1 to confirm, or press another to reselect.");
             printMoveInfo(8, 0.6, "Medium");
@@ -929,6 +966,15 @@ import java.io.IOException;
         playerIsBlocking = false;
         hasConfirmedAtk = true;
         hasConfirmedCombat = true;
+    }
+
+    protected static void winButton() {
+         moveSpeed = 100000;
+         moveRange = 20;
+         moveDamage = enemyHP*3;
+         playerIsAttacking = true;
+         hasConfirmedCombat = true;
+         moveName = "Dev Powers";
     }
 
     protected static void executeMoveEnemy(double speed, int range, double damage, String crowdControl, int ccNum, int stamDMG, int playSFX, int stamCost) throws UnsupportedAudioFileException, LineUnavailableException, IOException {

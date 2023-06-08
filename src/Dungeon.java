@@ -116,12 +116,12 @@ public class Dungeon extends Combat {
     static void dungeonEnemySpawner() {
         if (inWildlands)
         {
-            genericRNG(20,5);
+            genericRNG(10,5);
             dungeonEnemies = rngVal;
         }
         else 
          {
-             genericRNG(30,5);
+             genericRNG(15,5);
              dungeonEnemies = rngVal;
           }
         for (int z = 0; z < dungeonEnemies; z++) {
@@ -129,10 +129,16 @@ public class Dungeon extends Combat {
             while (dEnemyPosX[z] <= 0 && dEnemyPosY[z] <= 0)
             //Hopefully stops enemy locations from changing...
             {
-                    genericRNG(1, dungeonExitX - 1);
+                if (playerPosX != dungeonExitX) {
+                    genericRNG(1, dungeonExitX);
                     dEnemyPosX[z] = rngVal;
                     genericRNG(1, dungeonExitY - 1);
                     dEnemyPosY[z] = rngVal;
+                } else {
+                    dEnemyPosX[z] = dungeonExitX;
+                    genericRNG(1, dungeonExitY - 1);
+                    dEnemyPosY[z] = rngVal;
+                }
             }
             //Fills up the vacant spots where shelters should be
         }
