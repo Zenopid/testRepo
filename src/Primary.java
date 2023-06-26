@@ -38,7 +38,7 @@ public class Primary {
     protected static int smokeBombs = 0;
     protected static int cycloneStraws = 0;
     protected static int magmaWhistle = 0;
-    protected static double playerHP = 200 + (35 * level);
+    protected static double playerHP = 100 + (35 * level);
     protected static int coin = 0;
     //Money. Used to buy utility items as well as fast travel.
 
@@ -48,6 +48,8 @@ public class Primary {
     protected static int numofmoves = 5;
 
     protected static String enemyName = "";
+
+    protected static String enemyType = "";
     protected static boolean playerIsBlocking = false;
 
     protected static boolean enemyIsBlocking = false;
@@ -148,7 +150,6 @@ which then can be pulled by another method.
     protected static boolean hasConfirmedAtk;
     protected static boolean hasConfirmedMove;
     protected static boolean hasConfirmedCombat = false;
-    private static int cost;
 
     //Music
     protected static boolean musicPlaying = false;
@@ -315,10 +316,10 @@ which then can be pulled by another method.
     }
 
     static void dungeonSpawner() {
-        /*if (day%5 == 0)*/
+        if (day%5 == 0)
         {
             genericRNG(10, 4);
-            numofdungeons -= rngVal;
+            numofdungeons += rngVal;
         }
         for (int z = 0; z < numofdungeons; z++) {
             //This checks if an shelter is on a shop tile.
@@ -492,7 +493,7 @@ which then can be pulled by another method.
         moveSet.put("Move 5", "Skewer");
     }
 
-    protected static void skillTree() throws InterruptedException {
+    protected static void skillTree() {
         answerType = "";
         hasConfirmed = false;
         while (!playerLeft) {
@@ -535,70 +536,38 @@ which then can be pulled by another method.
                 playerResponse();
                 switch (answer) {
                     case 0 -> {
-                        if (level > 1) {
-                            answerType = "Phantom Slash";
-                            confirmMove(1);
-                        }
+                        if (level > 1) confirmMove(1, "Phantom SLash");
                     }
                     case 1 -> {
-                        if (level >= 3) {
-                            answerType = "Ki Charge";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "Ki Charge");
                     }
                     case 2 -> {
-                        if (level >= 3) {
-                            answerType = "Whirlwind";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "Whirlwind");
                     }
                     case 3 -> {
-                        if (level >= 3) {
-                            answerType = "Rising Upper";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "Rising Upper");
                     }
                     case 4 -> {
-                        if (level >= 5) {
-                            answerType = "Vanishing Strike";
-                            confirmMove(3);
-                        }
+                        if (level >= 5) confirmMove(3, "Vanishing Strike");
                     }
                     case 5 -> {
-                        if (level >= 8) {
-                            answerType = "Ki Charge 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Ki Charge 2");
                     }
                     case 6 -> {
-                        if (level >= 8) {
-                            answerType = "Whirlwind 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Whirlwind 2");
                     }
                     case 7 -> {
-                        if (level >= 8) {
-                            answerType = "Rising Upper 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Rising Upper 2");
+
                     }
                     case 8 -> {
-                        if (level >= 10) {
-                            answerType = "Vanishing Strike 2";
-                            confirmMove(3);
-                        }
+                        if (level >= 10) confirmMove(3, "Vanishing Strike 2");
                     }
                     case 9 -> {
-                        if (level >= 12) {
-                            answerType = "Sword Mastery";
-                            confirmMove(3);
-                        }
+                        if (level >= 12) confirmMove(3, "Sword Mastery");
                     }
                     case 10 -> {
-                        if (level >= 15) {
-                            answerType = "Phantom Slash 2";
-                            confirmMove(4);
-                        }
+                        if (level >= 15) confirmMove(4, "Phantom Slash 2");
                     }
                     default -> System.out.println("Invalid response.");
                 }
@@ -616,76 +585,42 @@ which then can be pulled by another method.
                     System.out.println("8: Shield Toss 2: Get the shield back on successful hit, and do bonus damage with your next strike.");
                     System.out.println("8: Shield Toss 2: Get the shield back on successful hit, and do bonus damage with your next strike.");
                 }
-                if (level >= 12)
-                    System.out.println("9: Shield Mastery: Take reduced damage on moves that involve your shield.");
+                if (level >= 12) System.out.println("9: Shield Mastery: Take reduced damage on moves that involve your shield.");
                 if (level >= 15) System.out.println("10: Ultimate: Earthquake 2: The next attack deals bonus damage.");
                 playerResponse();
                 switch (answer) {
                     case 0:
-                        if (level > 1) {
-                            answerType = "Earthquake";
-                            confirmMove(1);
-                        }
+                        if (level > 1) confirmMove(1, "Earthquake");
                         break;
                     case 1:
-                        if (level >= 3) {
-                            answerType = "Shield Sweep";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "Shield Sweep");
                         break;
                     case 2:
-                        if (level >= 3) {
-                            answerType = "Swap Hands";
-                            confirmMove(2);
-                        }
+                        if (level >= 3) confirmMove(2, "Swap Hands");
                         break;
                     case 3:
-                        if (level >= 3) {
-                            answerType = "Deflect";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "deflect");
                         break;
                     case 4:
-                        if (level >= 5) {
-                            answerType = "Shield Toss";
-                            confirmMove(2);
-                        }
+                        if (level >= 5) confirmMove(2, "Shield Toss");
                         break;
                     case 5:
-                        if (level >= 8) {
-                            answerType = "Shield Toss 2";
-                            confirmMove(3);
-                        }
+                        if (level >= 8) confirmMove(3, "Shield Toss 2");
                         break;
                     case 6:
-                        if (level >= 8) {
-                            answerType = "Swap Hands 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Swap Hands 2");
                         break;
                     case 7:
-                        if (level >= 8) {
-                            answerType = "Deflect 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Deflect 2");
                         break;
                     case 8:
-                        if (level >= 10) {
-                            answerType = "Shield Toss 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 10) confirmMove(2, "Shield Toss 2");
                         break;
                     case 9:
-                        if (level >= 12) {
-                            answerType = "Shield Mastery";
-                            confirmMove(3);
-                        }
+                        if (level >= 12) confirmMove(3, "Shield Mastery");
                         break;
                     case 10:
-                        if (level >= 15) {
-                            answerType = "Earthquake 2";
-                            confirmMove(4);
-                        }
+                        if (level >= 15) confirmMove(4, "Earthquake 2");
                         break;
                 }
             } else if (weaponName.contains("Axe")) {
@@ -710,85 +645,55 @@ which then can be pulled by another method.
                 playerResponse();
                 switch (answer) {
                     case 0:
-                        if (level > 1) {
-                            answerType = "Eradicate";
-                            confirmMove(1);
-                        }
+                        if (level > 1) confirmMove(1, "Eradicate");
                         break;
                     case 1:
-                        if (level >= 3) {
-                            answerType = "Ignite";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "Ignite");
                         break;
                     case 2:
                         if (level >= 3) {
                             answerType = "Overhead Cleave";
-                            confirmMove(1);
+                            confirmMove(1, "Overhead Cleave");
                         }
                         break;
                     case 3:
-                        if (level >= 3) {
-                            answerType = "Cripple";
-                            confirmMove(1);
-                        }
+                        if (level >= 3) confirmMove(1, "Cripple");
                         break;
                     case 4:
-                        if (level >= 5) {
-                            answerType = "Pyroslash";
-                            confirmMove(1);
-                        }
+                        if (level >= 5) confirmMove(1, "Pyroslash");
                         break;
                     case 5:
-                        if (level >= 8) {
-                            answerType = "Ignite 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Ignite 2");
                         break;
                     case 6:
-                        if (level >= 8) {
-                            answerType = "Overhead Cleave 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Overhead Cleave 2");
                         break;
                     case 7:
-                        if (level >= 8) {
-                            answerType = "Cripple 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 8) confirmMove(2, "Cripple 2");
                         break;
                     case 8:
-                        if (level >= 10) {
-                            answerType = "Pyroslash 2";
-                            confirmMove(2);
-                        }
+                        if (level >= 10) confirmMove(2, "Pyroslash 2");
                         break;
                     case 9:
-                        if (level >= 12) {
-                            answerType = "Axe Mastery";
-                            confirmMove(3);
-                        }
+                        if (level >= 12) confirmMove(3, "Axe Mastery");
                         break;
                     case 10:
-                        if (level >= 15) {
-                            answerType = "Eradicate 2";
-                            confirmMove(4);
-                        }
+                        if (level >= 15)  confirmMove(4, "Eradicate 2");
                         break;
                 }
             }
         }
     }
 
-    static void confirmMove(int cost) {
+    static void confirmMove(int cost, String requestedMove) {
         System.out.println("Cost: " + cost);
-        System.out.println("Press 1 to confirm you want " + answerType);
+        System.out.println("Press 1 to confirm you want " + requestedMove);
         playerResponse();
         if (answer == 1 && skillPoints >= cost) {
                 numofmoves += 1;
-                moveSet.put("Move " + numofmoves, answerType);
+                moveSet.put("Move " + numofmoves, requestedMove);
                 skillPoints -= cost;
-                System.out.println("You have unlocked " + answerType);
+                System.out.println("You have unlocked " + requestedMove);
         }
       else if(skillPoints<cost && answer == 1)System.out.println("Not enough points.");
         else System.out.println("You did not confirm.");
@@ -1750,20 +1655,19 @@ which then can be pulled by another method.
      */
     protected static void playMusic(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         Music audio = new Music();
-        audio.setFile(trackNum);
-        audio.startClip();
-        audio.loopClip();
+        Music.setFile(trackNum);
+        Music.startClip();
+        Music.loopClip();
         musicPlaying = true;
     }
     protected static void stopMusic() throws LineUnavailableException, IOException {
-        Music audio = new Music();
-        audio.stopClip();
+        Music.stopClip();
         musicPlaying = false;
     }
     protected static void soundEffect(int trackNum) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         Music audio = new Music();
-        audio.setFile(trackNum);
-        audio.startClip();
+        Music.setFile(trackNum);
+        Music.startClip();
     }
     protected static void resetMusic() {
         Music.dayMusic.setMicrosecondPosition(0);

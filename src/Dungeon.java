@@ -65,7 +65,7 @@ public class Dungeon extends Combat {
                     distanceFromExit();
                 }
                 for (int m = 0; m < dEnemyPosX.length ; m++) {
-                    if (playerPosX == dEnemyPosX[m] && playerPosY == dEnemyPosY[m]) {
+                    if (playerPosX == dEnemyPosX[m] && playerPosY == dEnemyPosY[m] && playerHP > 0) {
                         isFighting = true;
                         dungeonStopMusic();
                         Combat.fight();
@@ -152,7 +152,7 @@ public class Dungeon extends Combat {
     }
     static void dungeonTurnLoop() {
         System.out.println("You have " + (dungeonTimer - dungeonTurn) + " turns remaining.");
-        System.out.println("Your hp: " + playerHP);
+        System.out.println("Your hp: " + Math.round(playerHP));
         System.out.println("Your coordinates: (" + playerPosX + "," + playerPosY + ").");
         System.out.println("Press 1 to regain your strength, or press 2 to keep going...");
     }
