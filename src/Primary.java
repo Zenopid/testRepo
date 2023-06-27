@@ -18,7 +18,7 @@ public class Primary {
 
     //Time and weather
     protected static int day = 1;
-    protected static int weather = 0;
+    protected static String weather = "";
 
     protected static boolean spentDay = false;
 
@@ -121,6 +121,10 @@ public class Primary {
     protected static int playerPosY = 0;
     protected static boolean inWildlands = true;
     protected static boolean inMountains = false;
+
+    protected static String playerLocation = "Wildlands";
+
+    protected static int difficultyTier = 0;
     protected static boolean inDungeon = false;
 
     //Assorted Variables (Not specfic to any one aspect of the game)
@@ -215,14 +219,13 @@ which then can be pulled by another method.
                     case 4 -> playerLoadout();
                     case 5 -> {
                         stopMusic();
-                        if (inWildlands && onShop) {
+                        if (onShop) {
                             playMusic(12);
-                            basicShop();
+                            if (playerLocation.contains("Wildlands") && onShop) basicShop();
+                            else if (playerLocation.contains("Mountains") && onShop) advancedShop();
+                            //else if (playerLocation.contains("Stronghold") && onShop)  enhancedShop();
                         }
-                        if (inMountains && onShop) {
-                            playMusic(12);
-                            advancedShop();
-                        } else if (onDungeon) {
+                        else if (onDungeon) {
                             inDungeon = true;
                             Dungeon.undergroundExplore();
                         }
@@ -237,8 +240,7 @@ which then can be pulled by another method.
         }
         stopMusic();
         isFighting = true;
-        inWildlands = false;
-        inMountains = false;
+        playerLocation = "";
         Combat.fight();
         ending();
     }
@@ -282,13 +284,10 @@ which then can be pulled by another method.
         System.out.println("2: Shield: High defense and speed at the cost of offense.");
         System.out.println("3: Axe: High offense at the cost of defense and speed.");
     }
-
-
     static void genericRNG(int rngValmin, int rngValmax) {
         Random rand = new Random();
         rngVal = rand.nextInt(rngValmax) + rngValmin;
     }
-
     static void enemySpawner() {
         if (!isSnowing && day % 2 == 0) {
             genericRNG(2, 2);
@@ -299,15 +298,21 @@ which then can be pulled by another method.
             while (enemyPosX[z] <= 0 && enemyPosY[z] <= 0 && enemyPosX[z] != shopPosX[z] && enemyPosY[z] != shopPosY[z])
             //Hopefully stops enemy locations from changing...
             {
-                if (inWildlands) {
+                if (playerLocation.contains("Wildlands")) {
                     genericRNG(1, 24);
                     enemyPosX[z] = rngVal;
                     genericRNG(1, 24);
                     enemyPosY[z] = rngVal;
-                } else if (inMountains) {
+                } else if (playerLocation.contains("Mountains")) {
                     genericRNG(25, 25);
                     enemyPosX[z] = rngVal;
                     genericRNG(1, 25);
+                    enemyPosY[z] = rngVal;
+                }
+                else if (playerLocation.contains("Stronghold")) {
+                    genericRNG(25,25);
+                    enemyPosX[z] = rngVal;
+                    genericRNG(25,25);
                     enemyPosY[z] = rngVal;
                 }
             }
@@ -316,7 +321,7 @@ which then can be pulled by another method.
     }
 
     static void dungeonSpawner() {
-        if (day%5 == 0)
+        if (day % 5 == 0)
         {
             genericRNG(10, 4);
             numofdungeons += rngVal;
@@ -326,16 +331,22 @@ which then can be pulled by another method.
             while (dungeonPosX[z] <= 0 && dungeonPosY[z] <= 0 && dungeonPosX[z] != dungeonPosX[z] && dungeonPosY[z] != dungeonPosY[z])
             //Hopefully stops shelter locations from changing...
             {
-                if (inWildlands) {
+                if (playerLocation.contains("Wildlands")) {
                     genericRNG(1, 24);
                     dungeonPosX[z] = rngVal;
                     genericRNG(1, 24);
                     dungeonPosY[z] = rngVal;
-                } else if (inMountains) {
+                } else if (playerLocation.contains("Mountains")) {
                     genericRNG(25, 25);
                     dungeonPosX[z] = rngVal;
                     genericRNG(1, 24);
                     dungeonPosY[z] = rngVal;
+                }
+                else if (playerLocation.contains("Stronghold")) {
+                    genericRNG(25,25);
+                    enemyPosX[z] = rngVal;
+                    genericRNG(25,25);
+                    enemyPosY[z] = rngVal;
                 }
             }
             //Fills up the vacant spots where shelters should be
@@ -358,16 +369,22 @@ which then can be pulled by another method.
             while (shelterPosX[z] <= 0 && shelterPosY[z] <= 0 && shelterPosX[z] != shopPosX[z] && shelterPosY[z] != shopPosY[z])
             //Hopefully stops shelter locations from changing...
             {
-                if (inWildlands) {
+                if (playerLocation.contains("Wildlands")) {
                     genericRNG(1, 24);
                     shelterPosX[z] = rngVal;
                     genericRNG(1, 24);
                     shelterPosY[z] = rngVal;
-                } else if (inMountains) {
+                } else if (playerLocation.contains("Mountains")) {
                     genericRNG(25, 25);
                     shelterPosX[z] = rngVal;
                     genericRNG(1, 24);
                     shelterPosY[z] = rngVal;
+                }
+                else if (playerLocation.contains("Stronghold")) {
+                    genericRNG(25,25);
+                    enemyPosX[z] = rngVal;
+                    genericRNG(25,25);
+                    enemyPosY[z] = rngVal;
                 }
             }
             //Fills up the vacant spots where shelters should be
@@ -381,7 +398,7 @@ which then can be pulled by another method.
                 onShop = true;
                 underShelter = true;
                 break;
-            } else if (isSnowing && tempVal < -999) {
+            } else if (isSnowing) {
                 onShop = false;
                 underShelter = true;
                 tempVal = 2;
@@ -752,16 +769,22 @@ which then can be pulled by another method.
         for (int b = 0; b < numofchest; b++) {
             // the if statement checks if the chest is on a enemy tile or a shop tile
             while (chestPosX[b] <= 0 && chestPosY[b] <= 0 && chestPosX[b] == shopPosX[b] && chestPosY[b] == shopPosY[b] && chestPosX[b] == enemyPosX[b] && chestPosY[b] == enemyPosY[b]) {
-                if (inWildlands) {
+                if (playerLocation.contains("Wildlands")) {
                     genericRNG(1, 24);
                     chestPosX[b] = rngVal;
                     genericRNG(1, 24);
                     chestPosY[b] = rngVal;
-                } else if (inMountains) {
+                } else if (playerLocation.contains("Mountains")) {
                     genericRNG(25, 25);
                     chestPosX[b] = rngVal;
                     genericRNG(1, 24);
                     chestPosY[b] = rngVal;
+                }
+                else if (playerLocation.contains("Stronghold")) {
+                    genericRNG(25,25);
+                    enemyPosX[b] = rngVal;
+                    genericRNG(25,25);
+                    enemyPosY[b] = rngVal;
                 }
             }
         }
@@ -786,16 +809,22 @@ which then can be pulled by another method.
                 shopPosY[b] = rngVal;
                 for (int c = b + 1; c < numofshops; c++)
                     while (shopPosX[b] == enemyPosX[b] && shopPosY[b] == enemyPosY[b] || shopPosX[b] == dungeonPosX[b] && shopPosY[b] == dungeonPosY[b] || shopPosX[b] == shopPosY[c]) {
-                        if (inWildlands) {
+                        if (playerLocation.contains("Wildlands")) {
                             genericRNG(1, 24);
                             shopPosX[b] = rngVal;
                             genericRNG(1, 24);
                             shopPosY[b] = rngVal;
-                        } else if (inMountains) {
+                        } else if (playerLocation.contains("Mountains")) {
                             genericRNG(25, 25);
                             shopPosX[b] = rngVal;
                             genericRNG(1, 24);
                             shopPosY[b] = rngVal;
+                        }
+                        else if (playerLocation.contains("Stronghold")) {
+                            genericRNG(25,25);
+                            enemyPosX[b] = rngVal;
+                            genericRNG(25,25);
+                            enemyPosY[b] = rngVal;
                         }
                     }
             }
@@ -896,6 +925,11 @@ which then can be pulled by another method.
                     playerPosY = 0;
                     System.out.println("Teleported to the Wildlands.");
                 }
+                case 362412 -> {
+                    playerPosX = 25;
+                    playerPosY = 25;
+                    System.out.println("Teleported to the Stronghold.");
+                }
                 case 121212 -> {
                     playerHP += 10000000;
                     System.out.println("Activated immortality mode.");
@@ -939,24 +973,18 @@ which then can be pulled by another method.
         if (day % 7 == 0) {
             //Every 7 days, the weather will change
             genericRNG(1, 100);
-            if (rngVal >= 1 && rngVal <= 14) weather = 2;
-                //Thunderstorm
+            if (rngVal >= 1 && rngVal <= 14) weather = "Thunderstorm";
                 //Has a chance of randomly destroying generated things like shops, enemies and dungeons
-             else if (rngVal >= 15 && rngVal <= 23) weather = 3;
+             else if (rngVal >= 15 && rngVal <= 23) weather = "Duststorm";
                 //Duststorm
                 //Makes it impossible to see, hiding fight distance
-             else if (rngVal >= 24 && rngVal <= 40) weather = 4;
-                //Temporal wind
+             else if (rngVal >= 24 && rngVal <= 40) weather = "Temporal Wind";
                 //Randomly changes the day count
-             else if (rngVal >= 40 && rngVal <= 47) weather = 5;
-                //Incendiary rain
+             else if (rngVal >= 40 && rngVal <= 47) weather = "Incendiary Rain";
                 //Deals damage over time if you're not under shelter
-             else if (rngVal >= 48 && rngVal <= 59) weather = 6;
-                //Snow
+             else if (rngVal >= 48 && rngVal <= 59) weather = "Snow";
                 //Shops are closed, enemies hide under shelter.
-
-            else weather = 1;
-                //Clear
+            else weather = "Clear";
                 //No effect
         }
     }
@@ -965,17 +993,23 @@ which then can be pulled by another method.
         System.out.println("Weather: ");
         if (!inDungeon) {
         switch (weather) {
-                case 2 -> {
+                case "Thunderstorm" -> {
                     System.out.println("Thunderstorm: Lighting randomly strikes a tile, destroying anything on it.");
-                    if (inWildlands) {
+                    if (playerLocation.contains("Wildlands")) {
                         genericRNG(1,24);
                         boltPosX = rngVal;
                         genericRNG(1,24);
                         boltPosY = rngVal;
-                    } else if (inMountains) {
+                    } else if (playerLocation.contains("Mountains")) {
                         genericRNG(25,25);
                         boltPosX = rngVal;
                         genericRNG(1,24);
+                        boltPosY = rngVal;
+                    }
+                    else if (playerLocation.contains("Stronghold")) {
+                        genericRNG(25,25);
+                        boltPosX = rngVal;
+                        genericRNG(25,25);
                         boltPosY = rngVal;
                     }
                     for (int count = 0; count < enemyPosX.length; count++) {
@@ -1002,22 +1036,28 @@ which then can be pulled by another method.
                         }
                     }
 
-                } case 3 -> System.out.println("Duststorm: Prevents you from seeing combat distance.");
-                case 4 -> {
+                } case "Duststorm" -> System.out.println("Duststorm: Prevents you from seeing combat distance.");
+                case "Temporal Wind" -> {
                     System.out.println("Temporal wind: Blows you into the future if touched.");
                     int[] temporalWindPosX = new int[3];
                     int[] temporalWindPosY = new int[3];
                     for (int x = 0; x < 3; x++) {
-                        if (inWildlands) {
+                        if (playerLocation.contains("Wildlands")) {
                             genericRNG(1,24);
                             temporalWindPosX[x] = rngVal;
                             genericRNG(1,24);
                             temporalWindPosY[x] = rngVal;
-                        } else if (inMountains) {
+                        } else if (playerLocation.contains("Mountains")) {
                             genericRNG(25,25);
                             temporalWindPosX[x] = rngVal;
                             genericRNG(1,24);
                             temporalWindPosY[x] = rngVal;
+                        }
+                        else if (playerLocation.contains("Stronghold")) {
+                            genericRNG(25,25);
+                            boltPosX = rngVal;
+                            genericRNG(25,25);
+                            boltPosY = rngVal;
                         }
                     }
                     for (int count = 0; count < 3; count++) {
@@ -1029,7 +1069,7 @@ which then can be pulled by another method.
                         }
                     }
 
-                } case 5 -> {
+                } case "Incendiary Rain" -> {
                     int distanceX, distanceY;
                     System.out.println("Incendiary rain: Deals damage over time if not in shelter.");
                     for (int r = 0; r < shelterPosX.length; r++) {
@@ -1042,7 +1082,7 @@ which then can be pulled by another method.
                         //the tempVal is to cancel out the heal you get at the end of every day.
                         System.out.println("The fire rain burns your skin, causing you extreme pain...");
                     }
-                } case 6 -> {
+                } case "Snow" -> {
                     System.out.println("Snow: Enemy count doesn't increase, but shops are closed.");
                     isSnowing = true;
                 }
@@ -1367,8 +1407,9 @@ which then can be pulled by another method.
             if (answer2 > 25) System.out.println("You can't go there.");
              else
              {
-                if (inWildlands) System.out.println("See you later. Sorcerer powers GO!");
-                else if (inMountains) System.out.println("Apologies if I'm a bit off. Been a while...");
+                if (playerLocation.contains("Wildlands")) System.out.println("See you later. Sorcerer powers GO!");
+                else if (playerLocation.contains("Mountains")) System.out.println("Apologies if I'm a bit off. Been a while...");
+                else if (playerLocation.contains("Stronghold")) System.out.println("Let's see if you die! *chuckles*");
                 tempVal = playerPosX;
                 tempVal2 = playerPosY;
                 playerPosX = answer;
@@ -1378,12 +1419,14 @@ which then can be pulled by another method.
                 playerLeft = true;
             }
         } else if (coin < 200) {
-            if (inWildlands) System.out.println("Yeah... you're way too poor for that.");
-            else if (inMountains) System.out.println("Not much I can do if you don't have the money, I'm afraid.");
+            if (playerLocation.contains("Wildlands")) System.out.println("Yeah... you're way too poor for that.");
+            else if (playerLocation.contains("Mountains")) System.out.println("Not much I can do if you don't have the money, I'm afraid.");
+            else if (playerLocation.contains("Stronghold")) System.out.println("No money? But I need money for more comically large objects of mass destruction!");
         }
         else {
-            if (inWildlands) System.out.println("Make up your mind...");
-            else if (inMountains) System.out.println("Alright, if you say so.");
+            if (playerLocation.contains("Wildlands")) System.out.println("Make up your mind...");
+            else if (playerLocation.contains("Mountains")) System.out.println("Alright, if you say so.");
+            else if (playerLocation.contains("Stronghold")) System.out.println("But, but, but, you said you wanna... now I'm sad you lied to me...");
         }
     }
 
@@ -1424,10 +1467,12 @@ which then can be pulled by another method.
                 coin -= exchangeRate;
                 playerHP += improveRate;
                 if (playerHP > 75 + (35*level)) playerHP = 75 + (35*level);
-               if (inWildlands) System.out.println("Please continue throwing your life away, it brings me profit.");
-               else if (inMountains) System.out.println("Let's hope you last a bit longer next time.");
-            } else if (inWildlands) System.out.println("You're too poor. You can stop bleeding on my carpet now.");
-            else if (inMountains) System.out.println("I can't help you if you can't help me.");
+               if (playerLocation.contains("Wildlands")) System.out.println("Please continue throwing your life away, it brings me profit.");
+               else if (playerLocation.contains("Mountains")) System.out.println("Let's hope you last a bit longer next time.");
+               else if (playerLocation.contains("Stronghold")) System.out.println("Wow! You're alive! That went way better then last time!");
+            } else if (playerLocation.contains("Wildlands")) System.out.println("You're too poor. You can stop bleeding on my carpet now.");
+            else if (playerLocation.contains("Mountains")) System.out.println("I can't help you if you can't help me.");
+            else if (playerLocation.contains("Stronghold")) System.out.println("Where's money?! Don't see money in my hand...");
             hasConfirmedShop = true;
         }
     }
@@ -1458,37 +1503,61 @@ which then can be pulled by another method.
             System.out.println("Your overall power has increased by " + Math.round((playerPower - tempVal2)));
             Thread.sleep(5000);
         }
-        if (playerPosX > 25 && !inMountains)
+        if (playerPosX > 25 && !playerLocation.contains("Mountains"))
         {
-            System.out.println("You are going to enter the mountains. The enemies are stronger, but the loot is better. Press 1 to confirm, or press 2 to return.");
+            tempVal = 25;
+            System.out.println("You are going to enter the mountains.");
+            if (difficultyTier > tempVal) System.out.print(" The enemies are stronger, but the loot is better.");
+            System.out.println("Press 1 to confirm, or press 2 to return.");
             playerResponse();
             if (answer == 1)
             {
-                inWildlands = false;
-                inMountains = true;
+                playerLocation = "Mountains";
+                difficultyTier = Math.toIntExact(Math.round(tempVal));
                 System.out.println("To the mountains!");
             }
             else
             {
-                playerPosX = (int) tempVal;
-                playerPosY = (int) tempVal2;
+                playerPosX = Math.toIntExact(Math.round(tempVal));
+                playerPosY = Math.toIntExact(Math.round(tempVal2));
                 System.out.println("You have returned to your previous location.");
             }
         }
-        if (playerPosX < 25 && inMountains)
+        if (playerPosX < 25 && playerLocation.contains("Mountains"))
         {
             System.out.println("You are going to enter the wildlands. Press 1 to confirm, or press 2 to return.");
             playerResponse();
             if (answer == 1)
             {
-                inWildlands = true;
-                inMountains = false;
+                difficultyTier = 20;
+                playerLocation = "Wildlands";
                 System.out.println("To the wildlands!");
             }
-            else { while (playerPosX > 25) playerPosX -= 1;}
+            else {
+                playerPosX = Math.toIntExact(Math.round(tempVal));
+                playerPosY = Math.toIntExact(Math.round(tempVal2));
+                System.out.println("You have returned to your previous location.");
+            }
+        }
+        if (playerPosX > 25 && playerPosY > 25 && !playerLocation.contains("Stronghold")) {
+            tempVal = 30;
+            System.out.println("You are going to enter the stronghold.");
+            if (difficultyTier > tempVal) System.out.print(" The enemies are stronger, but the loot is better.");
+            System.out.println("Press 1 to confirm, or press 2 to return.");
+            playerResponse();
+            if (answer == 1)
+            {
+                playerLocation = "Stronghold";
+                System.out.println("To the stronghold!");
+            }
+            else {
+                playerPosX = Math.toIntExact(Math.round(tempVal));
+                playerPosY = Math.toIntExact(Math.round(tempVal2));
+                System.out.println("You have returned to your previous location.");
+            }
         }
         playerHP += (playerHP/10);
-        if (playerHP > 75 + (35*level)) playerHP = 75 + (35*level);
+        if (playerHP > 100 + (35*level)) playerHP = 100 + (35*level);
         day += 1;
     }
     static void upgradeGear() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
@@ -1496,8 +1565,7 @@ which then can be pulled by another method.
             //Can't let decayImp make the increase 0 or less
         genericRNG(1,6);
         int x = rngVal;
-        if (inWildlands) genericRNG(-(decayImp), (20*level) + (day));
-        else if (inMountains) genericRNG(-(decayImp),(25*level) + day);
+        genericRNG(-(decayImp), (difficultyTier*level) + (day));
         rngVal = Math.max(5, rngVal);
         if (Math.max(5,rngVal) == 5) System.out.println("Your hand grows tired fom the constant work...");
         //prevents stats from decreasing
