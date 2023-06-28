@@ -38,12 +38,22 @@ public class Primary {
     protected static int smokeBombs = 0;
     protected static int cycloneStraws = 0;
     protected static int magmaWhistle = 0;
+    protected static int poisonDart = 0;
+    protected static int insanityCurses = 0;
+    protected static int enlargementFlask = 0;
+
     protected static double playerHP = 100 + (35 * level);
     protected static int coin = 0;
     //Money. Used to buy utility items as well as fast travel.
 
     //Combat
     static HashMap<String, String> moveSet = new HashMap<>();
+
+    static HashMap<Integer, String> armorEnchantSet = new HashMap<>();
+
+    static HashMap<Integer, String> weaponEnchantSet = new HashMap<>();
+
+    static HashMap<String,Integer> enchantTier = new HashMap<>();
 
     protected static int numofmoves = 5;
 
@@ -130,6 +140,10 @@ public class Primary {
     //Assorted Variables (Not specfic to any one aspect of the game)
     protected static double tempVal = 0;
     protected static double tempVal2 = 0;
+
+    protected static int tempInt = 0;
+
+    protected static String tempString = "";
 
     /*
  generic doubles for all random number generator needs
@@ -223,7 +237,7 @@ which then can be pulled by another method.
                             playMusic(12);
                             if (playerLocation.contains("Wildlands") && onShop) basicShop();
                             else if (playerLocation.contains("Mountains") && onShop) advancedShop();
-                            //else if (playerLocation.contains("Stronghold") && onShop)  enhancedShop();
+                            else if (playerLocation.contains("Stronghold") && onShop)  enhancedShop();
                         }
                         else if (onDungeon) {
                             inDungeon = true;
@@ -727,7 +741,7 @@ which then can be pulled by another method.
             for (int count = 1; count < numofmoves + 1; count++) {
                 System.out.println("Move " + count + ": " + moveSet.get("Move " + count) + ".");
                 if (count == 5) System.out.println("---------------------------------------------------------------");
-                    //When the 5tb move is displayed, this line will also appear, showing that it's the last equipped move.
+                    //When the 5th move is displayed, this line will also appear, showing that it's the last equipped move.
             }
             System.out.println("Select the move you want to swap out using its corresponding number.");
             playerResponse();
@@ -755,7 +769,6 @@ which then can be pulled by another method.
             for (int count = 1; count < numofmoves + 1; count++) {
                 System.out.println("Move " + count + ": " + moveSet.get("Move " + count) + ".");
                 if (count == 5) System.out.println("---------------------------------------------------------------");
-                    //welp... i have no idea.
             }
             System.out.println("Press 0 to leave, or press another number to continue.");
             playerResponse();
@@ -859,13 +872,14 @@ which then can be pulled by another method.
         System.out.println("Your weapons:");
         System.out.println(weaponName);
         System.out.println("Your coordinates: (" + playerPosX + "," + playerPosY + ")");
+        System.out.println("Your location: " + playerLocation);
         System.out.println("1: Upgrade Gear");
         System.out.println("2: Explore");
         System.out.println("3: Skill Tree");
         System.out.println("4: Change Loadout");
         System.out.println("6: Cheat Codes");
         if (onShop && !isSnowing) System.out.println("You found a shop! Press 5 to go in!");
-        else if (onShop && isSnowing) System.out.println("You found a shop, but it looks like they're closed...");
+        else if (onShop) System.out.println("You found a shop, but it looks like they're closed...");
         else if (onDungeon) System.out.println("You found a dungeon! Press 5 to go in! \nGreat treasures await, but at great risk...");
     }
 
@@ -875,6 +889,33 @@ which then can be pulled by another method.
             System.out.println("Enter code:");
             playerResponse();
             switch (answer) {
+                case 69420 -> {
+                        int answer2 = 0;
+                        System.out.println("Type your x coordinate.");
+                        playerResponse();
+                        if (answer > 50) System.out.println("You can't go there.");
+                        else {
+                            System.out.println("Type your y coordinate.");
+                            hasConfirmed = false;
+                            while (!hasConfirmed) {
+                                try {
+                                    answer2 = KB.nextInt();
+                                    if (answer2 >= 0) hasConfirmed = true;
+                                    else System.out.println("Invalid response.");
+                                } catch (InputMismatchException e) {
+                                    System.out.println("Invalid response. Please enter a valid integer.");
+                                    KB.next();
+                                }
+                            }
+                        }
+                        if (answer2 > 25 && answer <= 24) System.out.println("You can't go there.");
+                        else {
+                            tempVal = playerPosX;
+                            tempVal2 = playerPosY;
+                            playerPosX = answer;
+                            playerPosY = answer2;
+                        }
+                    }
                 case 10001 -> {
                     day = 101;
                     playerDefense += 1250;
@@ -1232,7 +1273,7 @@ which then can be pulled by another method.
 
     static void advancedShop () throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         playerLeft = false;
-        System.out.println("Welcome to Wanderer's Source, the number 1 shop for all things with pointy ends or go boom.");
+        System.out.println("Welcome to Spellbound Sundries, hope I can extend your lifespan at least a little bit.");
         while (!playerLeft) {
             System.out.println("Your coins: " + coin);
             System.out.println("1: Buy Stats");
@@ -1382,6 +1423,251 @@ which then can be pulled by another method.
             }
         }
     }
+    static void enhancedShop() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
+        playerLeft = false;
+        System.out.println("Arcane Artifacts, Arcane Artifacts, ARCANE ARTIFACTS!");
+        while (!playerLeft) {
+            System.out.println("Your coins: " + coin);
+            System.out.println("1: Buy Stats");
+            System.out.println("2: Utility Items");
+            System.out.println("3: Fast Travel");
+            System.out.println("4: Quick Heal");
+            System.out.println("5: Enchants");
+            System.out.println("6: Leave Shop");
+            playerResponse();
+            switch (answer) {
+                case 1 -> {
+                    System.out.println("What would you like to upgrade?");
+                    Thread.sleep(500);
+                    System.out.println("1. Damage");
+                    System.out.println("2. Defense");
+                    System.out.println("3. Speed");
+                    playerResponse();
+                    switch (answer) {
+                        case 1 -> {
+                            System.out.println("The rate is 11 increase per 105 coins.");
+                            Thread.sleep(500);
+                            System.out.println("Press 1 to confirm, or press another number to go back.");
+                            playerResponse();
+                            if (answer == 1) {
+                                System.out.println("How much would you like to increase your damage?");
+                                playerResponse();
+                                tempVal2 = weapondmg;
+                                shopExchange(105,11);
+                                weapondmg += tempVal;
+                                soundEffect(14);
+                                System.out.println("We improved your damage by " + (weapondmg - tempVal2) + ".");
+                            } else System.out.println("Why you lie! Lying bad! Me hate lies!");
+                        }
+                        case 2 -> {
+                            System.out.println("The rate is 13 increase per 118 coins.");
+                            Thread.sleep(500);
+                            System.out.println("Press 1 to confirm, or press another number to go back.");
+                            playerResponse();
+                            if (answer == 1) {
+                                System.out.println("How much would you like to increase your defense?");
+                                hasConfirmed = false;
+                                playerResponse();
+                                tempVal2 = playerDefense;
+                                shopExchange(118,13);
+                                playerDefense += tempVal;
+                                soundEffect(14);
+                                System.out.println("We improved your defense by " + (playerDefense - tempVal2) + ".");
+                            } else System.out.println("Why you lie! Lying bad! Me hate lies!");
+
+                        }
+                        case 3 -> {
+                            System.out.println("The rate is 10 increase per 96 coins.");
+                            Thread.sleep(500);
+                            System.out.println("Press 1 to confirm, or press another number to go back.");
+                            playerResponse();
+                            if (answer == 1) {
+                                System.out.println("How much would you like to increase your speed?");
+                                playerResponse();
+                                tempVal = playerSpeed;
+                                shopExchange(96,10);
+                                playerSpeed += tempVal;
+                                soundEffect(14);
+                                System.out.println("We improved your speed by " + (playerSpeed - tempVal) + ".");
+                            } else System.out.println("Why you lie! Lying bad! Me hate lies!");
+
+                        }
+                    }
+
+                }
+                case 2 -> {
+                    System.out.println("You want more boom?");
+                    Thread.sleep(1000);
+                    System.out.println("1: Grappling Hook: Extends range of your next attack at the cost of speed.");
+                    System.out.println("2. Regenerative Stone: Heal yourself for a small amount.");
+                    System.out.println("3. Soul Snatcher: Hits the opponent for a percentage of their max hp, ignoring defense. ");
+                    System.out.println("4. Smoke Bomb: Choose your fight distance.");
+                    System.out.println("5. Cyclone Straw: Instantly brings the opponent directly in front of you.");
+                    System.out.println("6. Magma Whistle: Summons the hand of a fire giant, grabbing your opponent and slamming them far away.");
+                    System.out.println("7. Poison Dart: Deal a small percentage of damage over time.");
+                    System.out.println("8. Insanity Curse: Instantly cause your opponent to become angry.");
+                    System.out.println("9. Enlargement Flask: Gain super armor on your next attack.");
+                    System.out.println("Any other number: Go back");
+                    playerResponse();
+                    switch (answer) {
+                        case 1 -> {
+                            System.out.println("This item is single use and costs 75 per hook. How many do you want?");
+                            playerResponse();
+                            tempVal2 = grapplingHook;
+                            shopExchange(75,1);
+                            grapplingHook += tempVal;
+                            System.out.println("You bought " + (grapplingHook - tempVal2) + " grappling hooks.");
+                        }
+                        case 2 -> {
+                            System.out.println("This item is single use and costs 40 per stone. How many do you want?");
+                            playerResponse();
+                            tempVal2 = regenerativeStone;
+                            shopExchange(40,1);
+                            regenerativeStone += tempVal;
+                            System.out.println("You bought " + (regenerativeStone - tempVal2) + " stones.");
+                        }
+                        case 3 -> {
+                            System.out.println("This item is single use and costs 120 per snatcher. How many do you want?");
+                            playerResponse();
+                            tempVal2 = soulSnatcher;
+                            shopExchange(120,1);
+                            soulSnatcher += tempVal;
+                            System.out.println("You bought " + (soulSnatcher - tempVal2) + " Soul Snatchers.");
+                        }
+                        case 4 -> {
+                            System.out.println("This item is single use and costs 90 per bomb. How many do you want?");
+                            playerResponse();
+                            tempVal2 = smokeBombs;
+                            shopExchange(90,1);
+                            smokeBombs += tempVal;
+                            System.out.println("You bought " + (smokeBombs - tempVal2) + " smoke bombs.");
+                        }
+                        case 5 -> {
+                            System.out.println("This item is single use and costs 90 per straw. How many do you want?");
+                            playerResponse();
+                            tempVal2 = cycloneStraws;
+                            shopExchange(90,1);
+                            cycloneStraws += tempVal;
+                            System.out.println("You bought " + (cycloneStraws - tempVal2) + " cyclone straws.");
+                        }
+                        case 6 -> {
+                            System.out.println("This item is single use and costs 160 per straw. How many do you want?");
+                            playerResponse();
+                            tempVal2 = magmaWhistle;
+                            shopExchange(160,1);
+                            magmaWhistle += tempVal;
+                            System.out.println("You bought " + (magmaWhistle - tempVal2) + " magma whistles.");
+                        }
+                        case 7 -> {
+                            System.out.println("This item is single use and costs 175 per dart. How many do you want?");
+                            playerResponse();
+                            tempVal2 = poisonDart;
+                            shopExchange(160,1);
+                            poisonDart += tempVal;
+                            System.out.println("You bought " + (poisonDart - tempVal2) + " poison darts.");
+                        }
+                        case 8 -> {
+                            System.out.println("This item is single use and costs 195 per curse. How many do you want?");
+                            playerResponse();
+                            tempVal2 = insanityCurses;
+                            shopExchange(160,1);
+                            insanityCurses += tempVal;
+                            System.out.println("You bought " + (insanityCurses - tempVal2) + " insanity curses.");
+                        }
+                        case 9 -> {
+                            System.out.println("This item is single use and costs 215 per flask. How many do you want?");
+                            playerResponse();
+                            tempVal2 = enlargementFlask;
+                            shopExchange(160,1);
+                            enlargementFlask += tempVal;
+                            System.out.println("You bought " + (enlargementFlask - tempVal2) + " enlargement flasks.");
+                        }
+                        default -> System.out.println("You speak trash, need teacher!");
+                    }
+                }
+                case 3 -> fastTravel();
+                case 4 -> {
+                    System.out.println("It costs 115 coins to get 225 hp. Press 1 to confirm, or press another number to leave. ");
+                    playerResponse();
+                    if (answer == 1) shopHeal(115,225);
+                    else System.out.println("I guess you don't mind bleeding.");
+                    hasConfirmedShop = true;
+                }
+                case 5 -> {
+                    System.out.println("You want shiny rocks?");
+                    Thread.sleep(1000);
+                    boolean wantsEnchants = true;
+                    while (wantsEnchants) {
+                        System.out.println("1: Weapon Enchants");
+                        System.out.println("2: Armor Enchants");
+                        System.out.println("3: Upgrade Enchants");
+                        System.out.println("4: Leave");
+                        if (answer == 1) {
+                            System.out.println("----------------------------------------------------------------");
+                            System.out.println("1: Combo Gem. Damage increases the more you are able to hit your opponent without being hit.");
+                            System.out.println("2: Double Slash Gem. Deal bonus damage on every 2nd turn.");
+                            System.out.println("3: Parry Gem. After blocking an attack, the next attack deals bonus damage.");
+                        } else if (answer == 2) {
+                            System.out.println("----------------------------------------------------------------");
+                            System.out.println("1: Berserker Gem: Moving forward increases defense.");
+                            System.out.println("2: Reflection Gem: Blocking attacks has a low chance of inflicting damage back.");
+                            System.out.println("3: Absorption Gem: Blocking attacks boosts your stamina gain. ");
+                        } else if (answer == 3) {
+                            System.out.println("Select the type you want to upgrade:");
+                            System.out.println("1: Armor");
+                            System.out.println("2: Weapon");
+                            playerResponse();
+                            if (answer == 1) {
+                                System.out.println("Armor:");
+                                System.out.println("----------------------------------------------------------------");
+                                for (int a = 0; a < armorEnchantSet.size(); a++) {
+                                    System.out.println(a + ":" + armorEnchantSet.get(a));
+                                }
+                                System.out.println("Select the enchant you are looking to upgrade.");
+                                do {
+                                    playerResponse();
+                                   System.out.println(armorEnchantSet.get(answer));
+                                   tempString = armorEnchantSet.get(answer);
+                                } while (armorEnchantSet.get(answer) == null);
+                                System.out.println("Tier: " + enchantTier.get(tempString));
+                                int cost = enchantTier.get(tempString)*500;
+                                System.out.println("Cost: " + cost);
+                                System.out.println("Press 1 to confirm, or press another number to go back.");
+                                if (answer == 1 && coin >= cost) {
+                                   cost = enchantTier.get(tempString);
+                                   cost += 1;
+                                   enchantTier.replace(tempString, cost);
+                                   coin -= cost;
+                                   System.out.println("Ooo, you have shiny rock too...");
+                                }
+                                else if (coin < cost && answer == 1) System.out.println("Where is shiny rock... (too poor)");
+                                else System.out.println("*slumps into chair");
+                            }
+                             System.out.println("----------------------------------------------------------------");
+                             System.out.println("Weapons:");
+                             System.out.println("----------------------------------------------------------------");
+                             for (int b = 0; b < weaponEnchantSet.size(); b++) {
+                                 System.out.println(weaponEnchantSet.get(b));
+                             }
+
+
+                        }
+                        else if (answer == 4) {
+                            System.out.println("Hmm. No like shiny rocks?");
+                            wantsEnchants = false;
+                        }
+                    }
+                }
+                case 6 -> {
+                    stopMusic();
+                    System.out.println("Goodbye funny person! See again soon!");
+                    System.out.println("----------------------------------------------------------------");
+                    playerLeft = true;
+                }
+
+            }
+        }
+    }
     static void fastTravel()  {
         System.out.println("200 coins to fast travel. Press 1 if you don't mind us taking your money.");
         playerResponse();
@@ -1431,7 +1717,6 @@ which then can be pulled by another method.
     }
 
     static void playerResponse() {
-        answer = 0;
         hasConfirmed = false;
         while (!hasConfirmed) {
             try {
@@ -1482,10 +1767,11 @@ which then can be pulled by another method.
         coin += rngVal;
         requiredXP = 80*level;
         while (playerexp > requiredXP) {
+            requiredXP = 80*level;
             playerexp -= requiredXP;
             level += 1;
             skillPoints += 1;
-            System.out.println("You are now level " + level + " ! Your strength grows!");
+            System.out.println("You are now level " + level + "! Your strength grows!");
             tempVal2 = playerPower;
             tempVal = weapondmg;
             genericRNG((int) weapondmg/20, (int) weapondmg/10);
@@ -1499,11 +1785,11 @@ which then can be pulled by another method.
             genericRNG((int) playerSpeed/20, (int) playerSpeed/10);
             playerSpeed += rngVal;
             System.out.println("Your speed has increased by " + Math.round((playerSpeed - tempVal)));
-            playerPower = (weapondmg + playerSpeed + playerDefense + (200 + (level*50)))/4;
+            playerPower = (weapondmg + playerSpeed + playerDefense + (100 + (level*35)))/4;
             System.out.println("Your overall power has increased by " + Math.round((playerPower - tempVal2)));
             Thread.sleep(5000);
         }
-        if (playerPosX > 25 && !playerLocation.contains("Mountains"))
+        if (playerPosX > 25 && playerPosY <25 && !playerLocation.contains("Mountains"))
         {
             tempVal = 25;
             System.out.println("You are going to enter the mountains.");
@@ -1523,7 +1809,7 @@ which then can be pulled by another method.
                 System.out.println("You have returned to your previous location.");
             }
         }
-        if (playerPosX < 25 && playerLocation.contains("Mountains"))
+        if (playerPosX < 25 && playerPosY < 25 && playerLocation.contains("Mountains"))
         {
             System.out.println("You are going to enter the wildlands. Press 1 to confirm, or press 2 to return.");
             playerResponse();

@@ -9,7 +9,7 @@ class Combat extends Primary {
 
      private static Music music;
 
-     public Combat(Music Music) {
+    public Combat(Music Music) {
          music = Music;
      }
 
@@ -22,6 +22,7 @@ class Combat extends Primary {
     protected static boolean isIgnited = false;
     protected static int shieldLocation = 0;
 
+    private static boolean isPrimal = false;
     protected static int pyroslashLocation = 0;
 
     protected static boolean usedPyroslash = false;
@@ -48,6 +49,8 @@ class Combat extends Primary {
 
     //Armor checker,lets you still hit the opponent even if your move was slower or weaker.
     protected static boolean hasArmor = false;
+
+    protected static int armorDuration = 0;
 
     protected static boolean playerIsActionable = true;
 
@@ -82,13 +85,27 @@ class Combat extends Primary {
 
     protected static boolean enemyWillAttack = false, enemyWillMove = false, enemyWillDefend = false;
 
+    protected static int  eSmokeBomb = 2;
+
+    protected static int ePoisonDart = 2;
+
+    protected static int enemyDOTDuration = 0;
+
+    protected static int DOTDuration = 0;
+
+    protected static double DOTDamage = 0;
+
+    protected static double enemyDOTDamage = 0;
+
+    protected static boolean enemyTakesDOT = false;
+
+    protected static boolean playerTakesDOT = false;
      public static void fight() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
          if (moveSet.containsValue("Swap")) shieldHand = "D";
         else shieldHand = "";
        if (day <= 99 ) {
            genericRNG(1, 2);
-           tempVal = Math.toIntExact(Math.round(rngVal));
-           combatMusic((int) tempVal);
+           combatMusic(rngVal);
        }
        else combatMusic(2);
         clearConsole();
@@ -135,12 +152,12 @@ class Combat extends Primary {
             tempVal = enemyStamina;
             if (enemyIsActionable) {
                 switch (enemyName) {
-                    case "Weak Swords-man", "Strong Swords-man" -> swordsmanAI();
-                    case "Strong Shields-man", "Weak Shields-man" -> shieldsmanAI();
-                    case "Strong Bowman" -> bowmanAI();
-                    case "Bear" -> bearAI(); 
+                    case "Weak Swords-man", "Strong Swords-man", "Ninja Swords-man" -> swordsmanAI();
+                    case "Strong Shields-man", "Weak Shields-man", "Ninja Shields-man" -> shieldsmanAI();
+                    case "Strong Bowman", "Ninja Bowman" -> bowmanAI();
+                    case "Bear", "Attack Dog" -> beastAI();
+                    case "Oni" -> oniAI();
                     case "The Last" -> BossAI();
-                    //  if (enemyName.equals("The Last")) BossAI();
                 }
                 if (fightRange < 0) fightRange = 0;
                 else if (fightRange > 8) fightRange = 8;
@@ -173,13 +190,12 @@ class Combat extends Primary {
         switch (enemyName) {
             case "Weak Swords-man" -> System.out.println("A weak swordsman attacks you!");
             case "Strong Swords-man" -> System.out.println("An experienced swordsman forces you into a duel...");
-            case "Dauntless Swords-man" -> System.out.println("You sense a swordsman flowing with power...");
+            case "Ninja Swords-man" -> System.out.println("You sense a swordsman flowing with power...");
             case "Weak Shields-man" -> System.out.println("A weak shieldsman attacks you!");
             case "Strong Shields-man" -> System.out.println("An experienced shieldsman forces you into a duel...");
-            case "Dauntless Shields-man" -> System.out.println("You sense a shieldsman flowing with power...");
+            case "Ninja Shields-man" -> System.out.println("You sense a shieldsman flowing with power...");
             case "Strong Bowman" -> System.out.println("You get the strange feeling someone is aiming at you...");
             case "Bear" -> System.out.println("A deep growl sends shivers down your spine...");
-
             default -> System.out.println("The smell of smoke surrounds you...");
         }
                 Thread.sleep(1000);
@@ -189,172 +205,150 @@ class Combat extends Primary {
                 System.out.println("BEGINNING COMBAT");
                 System.out.println("-----------------------------------------------------------");
         }
-
-    static void enemyTypeSelector() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+static void enemyStatSelector(int dmg, int dmg2, int hp, int spd, int spd2, int def, int def2) {
+         genericRNG(dmg, dmg2);
+         enemyDamage = rngVal;
+         genericRNG(spd, spd2);
+         enemySpeed = rngVal;
+         genericRNG(def,def2);
+         enemyDefense = rngVal;
+    enemyHP = hp;
+}
+    static void enemyTypeSelector() {
         if (playerLocation.contains("Wildlands")) {
-
-            genericRNG(1,2);
+            genericRNG(1, 2);
             if (rngVal == 1) enemyName = "Weak Shields-man";
             else enemyName = "Weak Swords-man";
+            switch (enemyName) {
+                case "Weak Shields-man":
+                    enemyStatSelector(55, (day * level) + 15, 135, 80, (day * level) + 20, 100, (day * level) + 20);
+                    break;
+                case "Weak Swords-man":
+                    tempInt = (day * level) + 30;
+                    enemyStatSelector(65, tempInt, 115, 65, tempInt, 60, tempInt);
+                    break;
+            }
         }
-        switch (enemyName) {
-            case "Weak Shields-man":
-                enemyHP = 135;
-                genericRNG(55, (day*level) + 15); // This is for dmg
-                enemyDamage = rngVal;
-                genericRNG(80, (day*level) + 20 ); // This is for speed
-                enemySpeed = rngVal;
-                genericRNG(100, (day*level)+ 20); // This is for defense
-                enemyDefense = rngVal;
-                break;
-            case "Weak Swords-man":
-                enemyHP = 115;
-                tempVal = (day * level) + 30;
-                genericRNG(65, (int) (tempVal)); // This is for dmg
-                enemyDamage = rngVal;
-                genericRNG(65, (int) (tempVal)); // This is for speed
-                enemySpeed = rngVal;
-                genericRNG(60, (int) (tempVal)); // This is for defense
-                enemyDefense = rngVal;
-                break;
-        }
-              if (inMountains) {
+            else if (playerLocation.contains("Mountains")) {
                 genericRNG(1,7);
+            tempInt = Math.toIntExact(Math.round((day * level) * 1.25));
                 switch (rngVal) {
                     case 2:
                         enemyName = "Bear";
+                        enemyStatSelector(165, tempInt, 250, 150, tempInt, 105, tempInt);
                         break;
                     case 4:
                     case 5:
-                    enemyName = "Strong Bowman";
-                    break;
+                        enemyName = "Strong Bowman";
+                        enemyStatSelector(120, tempInt, 185, 75, tempInt, 105, tempInt);
+                        break;
                     case 6:
                         enemyName = "Strong Shields-man";
+                        enemyStatSelector(225, tempInt, 225, 130, tempInt, 145, tempInt);
                         break;
-                    default: enemyName = "Strong Swords-man";
-                }
-                switch (enemyName) {
-                    case "Strong Swords-man":
-                    enemyHP = 150;
-                    tempVal = ((day * level) * 1.25);
-                    genericRNG(145,(int) tempVal); // This is for dmg
-                    enemyDamage = rngVal;
-                    genericRNG(130, (int) tempVal); // This is for speed
-                    enemySpeed = rngVal;
-                    genericRNG(90, (int) tempVal); // This is for defense
-                    enemyDefense = rngVal;
-                    break;
-                    case "Bear":
-                    enemyHP = 240;
-                    genericRNG(165, (int) ((day*level)*1.25)); // This is for dmg
-                    enemyDamage = rngVal;
-                    genericRNG(150, (int) ((day*level)*1.25)); // This is for speed
-                    enemySpeed = rngVal;
-                    genericRNG(105, (int) ((day*level)*1.25)); // This is for defense
-                    enemyDefense = rngVal;
-                    break;
-                    case "Strong Bowman": {
-                    enemyHP = 185;
-                    genericRNG(120, (day*level)); // This is for dmg
-                    enemyDamage = rngVal;
-                    genericRNG(75, (day*level)); // This is for speed
-                    enemySpeed = rngVal;
-                    genericRNG(75,(day*level)); // This is for defense
-                    enemyDefense = rngVal;
-                }
-                    case "Strong Shields-man":
-                    enemyHP = 225;
-                    genericRNG(225, (day*level)); // This is for dmg
-                    enemyDamage = rngVal;
-                    genericRNG(110,(day*level)); // This is for speed
-                    enemySpeed = rngVal;
-                    genericRNG(145, (day*level)); // This is for defense
-                    enemyDefense = rngVal;
-                    break;
+                    default: {
+                        enemyName = "Strong Swords-man";
+                        enemyStatSelector(145, tempInt, 150, 110, tempInt, 90, tempInt);
+                    }
                 }
             }
+            else if (playerLocation.contains("Stronghold")) {
+                genericRNG(1,9);
+            tempInt = Math.toIntExact(Math.round((day*level)*1.5));
+            switch (rngVal) {
+                case 1:
+                case 2:
+                    enemyName = "Attack Dog";
+                    enemyStatSelector(190, tempInt, 285, 180, tempInt, 135, tempInt);
+                    break;
+                case 4:
+                case 5:
+                    enemyName = "Ninja Archer";
+                    enemyStatSelector(240, tempInt, 215, 155, tempInt, 130, tempInt);
+                    break;
+                case 6:
+                case 7: {
+                    enemyName = "Ninja Shields-man";
+                    enemyStatSelector(210, tempInt, 300, 190, tempInt, 175, tempInt);
+                    break;
+                }
+                case 8:
+                    enemyName = "Oni";
+                    enemyStatSelector(300, tempInt, 350, 215, tempInt, 190, tempInt);
+                    break;
+                default: {
+                    enemyName = "Ninja Swords-man";
+                    enemyStatSelector(265, tempInt, 240, 165, tempInt, 145, tempInt);
+                }
+            }
+            /*
+               case "Strong Swords-man":
+                    tempVal = ((day * level) * 1.25);
+                    enemyStatSelector(145, (int) tempVal, 150, 130, (int) tempVal, 90, (int) tempVal);
+                      //  (int dmg, int dmg2, int hp, int spd, int spd2, int def, int def2)
+                    break;
+                    case "Bear":
+                    enemyStatSelector(165, (int) ((day*level)*1.25), 250, 150, (int) ((day*level)*1.25), 105,  (int) ((day*level)*1.25));
+                    break;
+                    case "Strong Bowman": {
+                        enemyStatSelector(120, (int) (day*level*1.25), 185, 75, (int) (day*level*1.25), 105, (int) (day*level*1.25));
+                        break;
+                    }
+                    case "Strong Shields-man":
+                    enemyStatSelector(225, (int) (day*level*1.25), 225, 110, (int) (day*level*1.25), 145, (int) (day*level*1.25));
+                    break;
+                }
+             */
+        }
 
               if (inDungeon) {
-                  if (enemyName.contains("Sword")) {
-                      enemyHP += (double) Dungeon.dungeonPower/15;
-                      enemyDamage += (double) Dungeon.dungeonPower/3;
-                      enemySpeed += (double) Dungeon.dungeonPower/3;
-                      enemyDefense += (double) Dungeon.dungeonPower/3;
-                  }
-                  else if (enemyName.contains("Shield")) {
-                      enemyHP += (double) Dungeon.dungeonPower/12;
-                      enemyDamage += (double) Dungeon.dungeonPower/10;
-                      enemySpeed += (double) Dungeon.dungeonPower/3;
-                      enemyDefense += (double) Dungeon.dungeonPower/2;
-                  }
-                  else if (enemyName.contains("Bow")) {
-                      enemyHP += (double) Dungeon.dungeonPower/20;
-                      enemyDamage += (double) Dungeon.dungeonPower/2;
-                      enemySpeed += (double) Dungeon.dungeonPower/4;
-                      enemyDefense += (double) Dungeon.dungeonPower/4;
-                  }
-                  else if (enemyName.contains("Bear")) {
-                      enemyHP += (double) Dungeon.dungeonPower/17;
-                      enemyDamage += (double) Dungeon.dungeonPower/3;
-                      enemySpeed += (double) Dungeon.dungeonPower/4;
-                      enemyDefense += (double) Dungeon.dungeonPower/5;
-                  }
+                  if (enemyName.contains("Sword")) dungeonStrengthen(15,3,3,3);
+                  else if (enemyName.contains("Shield")) dungeonStrengthen(12,10,3,2);
+                  else if (enemyName.contains("Bow")) dungeonStrengthen(20,2,4,4);
+                  else if (enemyName.contains("Bear")) dungeonStrengthen(17,3,4,5);
+                  else if (enemyName.contains("Ninja")) dungeonStrengthen(16,6.666,2.5,5);
               }
             //sound effects
 
             if (enemyName.contains("Sword")) combatSoundEffect(4);
             enemyPower = (enemyHP + enemyDamage + enemySpeed + enemyDefense) / 4;
-
             if (enemyName.contains("Sword") || enemyName.contains("Shield")) enemyType = "Melee Human";
             else if (enemyName.contains("Bow")) enemyType = "Range Human";
             else if (enemyName.contains("Bear")) enemyType = "Beast";
     }
 
+    static void setEmotion(String emotion, int rage, int ego, int fear) {
+         enemyBehaviour = emotion;
+         enemyRage = rage;
+         enemyEgo = ego;
+         enemyFear = fear;
+    }
+    static void dungeonStrengthen(double hp, double dmg, double spd, double def) {
+        enemyHP += (double) Dungeon.dungeonPower/hp;
+        enemyDamage += (double) Dungeon.dungeonPower/dmg;
+        enemySpeed += (double) Dungeon.dungeonPower/spd;
+        enemyDefense += (double) Dungeon.dungeonPower/def;
+    }
     static void enemyPlaystyle() {
         if (enemyType.contains("Melee Human")) {
             if (enemyName.contains("Weak")) genericRNG(1, 2);
             else if (enemyName.contains("Strong")) genericRNG(1, 4);
-            else if (enemyName.contains("Dauntless")) genericRNG(1, 5);
+            else if (enemyName.contains("Ninja")) genericRNG(1, 5);
             switch (rngVal) {
-                case 1 -> {
-                    enemyBehaviour = "Angry";
-                    enemyRage = 80;
-                    enemyEgo = 10;
-                    enemyFear = 10;
-                }
-                case 2 -> {
-                    enemyBehaviour = "Fearful";
-                    enemyFear = 80;
-                    enemyEgo = 10;
-                    enemyRage = 10;
-                }
-                case 4 -> {
-                    enemyBehaviour = "Overconfident";
-                    enemyEgo = 80;
-                    enemyFear = 10;
-                    enemyRage = 10;
-                }
-                case 5 -> {
-                    enemyBehaviour = "Cautious";
-                    enemyFear = 50;
-                    enemyEgo = 30;
-                    enemyRage = 20;
-                }
-                default -> {
-                    enemyBehaviour = "Focused";
-                    enemyFear = 33;
-                    enemyEgo = 33;
-                    enemyRage = 33;
-                }
+                case 1 -> setEmotion("Angry", 80, 10,10);
+                case 2 -> setEmotion("Fearful", 10, 10, 80);
+                case 4 -> setEmotion("Overconfident", 10, 80, 10);
+                case 5 -> setEmotion("Cautious", 20, 30, 50);
+                default -> setEmotion("Focused", 33,33,33);
             }
         }
         else if (enemyType.contains("Beast")) {
             if (enemyName.contains("Bear")) genericRNG(1,2);
-            switch (rngVal) {
-                case 1 -> enemyBehaviour = "Cautious";
-                default -> enemyBehaviour = "Angry";
+            else genericRNG(1,3);
+                if (rngVal == 1) setEmotion("Cautious", 20, 30, 50);
+                else if (rngVal == 4) setEmotion("Focused", 33,33,33);
+                else setEmotion("Angry", 80, 10,10);
             }
-        }
         }
      static void turnLoop() throws InterruptedException {
         //This just prints all the data the player needs to make their decisions.
@@ -362,7 +356,7 @@ class Combat extends Primary {
         System.out.println("Your stamina: " + playerStamina + "%");
         if (!weather.contains("Duststorm"))/*weather 3  is duststorm, which blinds you */ {
             System.out.println("Enemy health: " + Math.round(enemyHP));
-            System.out.println("Enemy stamina: " + Math.round(enemyStamina) + "%");
+            System.out.println("Enemy stamina: " + enemyStamina + "%");
             System.out.println("Distance: " + fightRange);
         }
         else System.out.println("The storm blinds you, not allowing you to see your opponent...");
@@ -370,11 +364,11 @@ class Combat extends Primary {
         System.out.println("Super: " + superMeter + "%");
         System.out.println("Turn: " + turn);
         Thread.sleep(500);
-        System.out.println("1: Select Attack ");
+        System.out.println("1: Select Attack");
         System.out.println("2: Move ");
         System.out.println("3: Block ");
         System.out.println("4: Utility Items");
-        System.out.println("5: Wait ");
+        System.out.println("5: Wait");
         System.out.println("6: Win Button");
         playerHasWhiffed = false;
         enemyHasWhiffed = false;
@@ -397,6 +391,32 @@ class Combat extends Primary {
         else System.out.println("You did not confirm.");
     }
 
+    static void playerUniversalOptions(char option) {
+        playerIsAttacking = false;
+        playerIsBlocking = false;
+        playerHasWhiffed = false;
+        switch (option) {
+            case 'F' -> {
+                moveName = "Walk Forward";
+                playerStamina += 10;
+            }
+            case 'B' -> {
+                moveName = "Walk Backwards";
+                playerStamina += 5;
+            }
+            case 'G' -> {
+                playerIsBlocking = true;
+                moveName = "Block";
+            }
+            case 'W' -> {
+                enemymoveName = "Wait";
+                playerStamina += 20;
+                if (playerStamina > 100) playerStamina = 100;
+            }
+        }
+        hasConfirmedCombat = true;
+    }
+
     static void playerMove() throws InterruptedException {
         //Reposition to set up a sweet spot or to get to a safe range to wait.
         playerIsBlocking = false;
@@ -415,29 +435,13 @@ class Combat extends Primary {
                     if ((fightRange + 1) > 8) {
                         System.out.println("You cannot move further back. Please re-input your movement option.");
                         fightRange -=1;
-                    } else {
-                        moveName = "Walk Backwards";
-                        playerHasWhiffed = false;
-                        playerIsAttacking = false;
-                        playerIsBlocking = false;
-                        hasConfirmedCombat = true;
-                        hasConfirmedMove = true;
-                        playerStamina += 5;
-                    }
+                    } else playerUniversalOptions('B');
                 }
             }
            else if (answerType.contains("D") || answerType.contains("d")) {
                 if ((fightRange - 1) < 0) {
                     System.out.println("You cannot move into your opponent. Please re-input your movement option.");
-                } else {
-                    moveName = "Walk Forwards";
-                    playerIsAttacking = false;
-                    playerIsBlocking = false;
-                    playerHasWhiffed = false;
-                    hasConfirmedCombat = true;
-                    hasConfirmedMove = true;
-                    playerStamina += 10;
-                }
+                } else playerUniversalOptions('F');
             }
             else {
                 System.out.println("You did not confirm.");
@@ -450,14 +454,7 @@ class Combat extends Primary {
         //Alternative to wait to get some stamina back at the cost of hp.
         System.out.println("Press 1 to confirm block, or 0 to go back.");
         playerResponse();
-        if (answer != 0) {
-            playerIsBlocking = true;
-            playerIsAttacking = false;
-            moveName = "Block";
-            moveDamage = 0;
-            moveRange = 0;
-            hasConfirmedCombat = true;
-        }
+        if (answer != 0) playerUniversalOptions('G');
     }
     static void universalMoves() {
         //Right now it's only shove, but any move that's possible by any weapon will be listed here
@@ -474,7 +471,48 @@ class Combat extends Primary {
     playerStamina -= staminaCost;
         }
     }
+    static void getMove() {
+        System.out.println("Select your move using the corresponding number: ");
+        for (int count = 1; count < 6; count++) {
+            System.out.println(count + ": " + moveSet.get("Move " + count) + ".");
+        }
+        System.out.println("Or press 0 to go back.");
+        playerResponse();
+        if (answer != 0) tempMove = moveSet.get("Move " + answer);
+        else hasConfirmedAtk = true;
+        while (tempMove == null || answer > 5) {
+            System.out.println("Invalid response. Please try again.");
+            playerResponse();
+            tempMove = moveSet.get("Move " + answer);
+        }
+    }
     
+    static void enemyUniversalOptions(char option) {
+        enemyIsAttacking = false;
+        enemyHasWhiffed = false;
+        switch (option) {
+            case 'F' ->  {
+                enemymoveName = "Walk Forward";
+                enemyStamina += 10;
+                combatSoundEffect(11);
+            }
+            case 'B' -> {
+                enemymoveName = "Walk Backwards";
+                enemyStamina += 5;
+                combatSoundEffect(11);
+            }
+            case 'W' -> {
+                enemymoveName = "Wait";
+                enemyStamina += 20;
+            }
+            case 'G' -> {
+                enemymoveName = "Block";
+                enemyIsBlocking = true;
+            }
+        }
+        enemyConfirm = true;
+    }
+
     static void swordSelection() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
         /* Sword Movelist:
         Forward Swipe
@@ -491,19 +529,7 @@ class Combat extends Primary {
         hasConfirmedAtk = false;
         while (!hasConfirmedAtk) {
             if (swordCharged) System.out.println("Your sword is charged!");
-            System.out.println("Select your move using the corresponding number: ");
-            for (int count = 1; count < 6; count++) {
-                System.out.println(count + ": " + moveSet.get("Move " + count) + ".");
-            }
-            System.out.println("Or press 0 to go back.");
-            playerResponse();
-            if (answer != 0) tempMove = moveSet.get("Move " + answer);
-            else hasConfirmedAtk = true;
-            while (tempMove == null || answer > 5) {
-                System.out.println("Invalid response. Please try again.");
-                playerResponse();
-                tempMove = moveSet.get("Move " + answer);
-            }
+           getMove();
             if (tempMove.contains("Forward Swipe")) {
                 staminaCost = 20;
                 if (staminaCost >= playerStamina ) {
@@ -669,21 +695,9 @@ class Combat extends Primary {
         playerIsBlocking = false;
         hasConfirmedAtk = false;
         while (!hasConfirmedAtk) {
-            System.out.println("Select your move using the corresponding number: ");
-            for (int count = 1; count < 6; count++) {
-                System.out.println(count + ": " + moveSet.get("Move " + count) + ".");
-            }
-            System.out.println("Or press 0 to go back.");
-            playerResponse();
-            if (answer != 0) tempMove = moveSet.get("Move " + answer);
-            else hasConfirmedAtk = true;
-            while (tempMove == null || answer > 5) {
-                System.out.println("Invalid response.");
-                playerResponse();
-                tempMove = moveSet.get("Move " + answer);
-            }
+            getMove();
             if (!hasShield) {
-                if (tempMove.contains("Bash") || tempMove.contains("Earthquake ") || tempMove.contains("Deflect") || tempMove.contains("Swap")) {
+                if (tempMove.contains("Bash") || tempMove.contains("Earthquake") || tempMove.contains("Deflect") || tempMove.contains("Swap")) {
                     System.out.println("You don't have your shield, so you can't use " + tempMove);
                     break;
                 }
@@ -718,8 +732,8 @@ class Combat extends Primary {
                     System.out.println("Not enough stamina.");
                     break;
                 }
-                System.out.println("Jump up and smash your shield against the ground,. Bonus damage if 2 spaces away.");
-                moveDescription = "Jump up and smash your shield against the ground,. Bonus damage if 2 spaces away.";
+                System.out.println("Jump up and smash your shield against the ground. Bonus damage if 2 spaces away.");
+                moveDescription = "Jump up and smash your shield against the ground. Bonus damage if 2 spaces away.";
                 printMoveInfo(2,0.7, "High");
                 playerResponse();
                 if (answer == 1) executeMove(0.7,2,1.1,"",0,0,0);
@@ -806,7 +820,8 @@ class Combat extends Primary {
                         playerResponse();
                         if (answer == 1) executeMove(0.7,3,0.6,"",0,0,0);
                     }
-                } else {
+                } else if (answer == 2) System.out.println("You do not have the required move.");
+                else {
                     System.out.println("Off hand: Deals bonus damage. Dominant hand: Increased speed.");
                     printMoveInfo(0,0, "N.A");
                     playerResponse();
@@ -841,11 +856,11 @@ class Combat extends Primary {
                 }
                 System.out.println("Spin around, striking your opponents ankles, lowering their stamina heavily.");
                 moveDescription = "Spin around, striking your opponents ankles, lowering their stamina heavily.";
-                printMoveInfo(5, 0.6, "Medium (depends on distance)");
+                printMoveInfo(5, 0.9/fightRange, "Medium (depends on distance)");
                 playerResponse();
                 if (answer == 1) {
                     hasShield = false;
-                    executeMove(0.6/fightRange,5,0.7 - (attackDamage /fightRange), "",0,0,0);
+                    executeMove(0.9/fightRange,5,0.7 - (attackDamage /fightRange), "",0,0,0);
                 } else hasConfirmedAtk = true;
             }
     }
@@ -867,17 +882,7 @@ class Combat extends Primary {
         playerIsBlocking = false;
         hasConfirmedAtk = false;
         while (!hasConfirmedAtk) {
-            System.out.println("Select your move using the corresponding number: ");
-            for (int count = 1; count < 6; count++) System.out.println(count + ": " + moveSet.get("Move " + count) + ".");
-            System.out.println("Or press 0 to go back.");
-            playerResponse();
-            if (answer != 0) tempMove = moveSet.get("Move " + answer);
-            else hasConfirmedAtk = true;
-            while (tempMove == null || answer > 5) {
-                System.out.println("Invalid response.");
-                playerResponse();
-                tempMove = moveSet.get("Move " + answer);
-            }
+          getMove();
             if (tempMove.contains("Forward Slash")) {
                 staminaCost = 20;
                 if (staminaCost >= playerStamina) {
@@ -1060,7 +1065,7 @@ class Combat extends Primary {
     }
 
 
-    static void utilityItem() throws InterruptedException, UnsupportedAudioFileException, LineUnavailableException, IOException {
+    static void utilityItem() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         /*
         Right now the utility list is this:
         Grappling Hook: +1 range, -20% speed
@@ -1073,7 +1078,15 @@ class Combat extends Primary {
             if (soulSnatcher > 0) System.out.println("3: Soul Snatcher");
             if (smokeBombs > 0) System.out.println("4: Smoke Bomb");
             if (cycloneStraws > 0) System.out.println("5: Cyclone Straw");
-            if (magmaWhistle > 0) System.out.println("Magma Whistle");
+            if (magmaWhistle > 0) System.out.println("6: Magma Whistle");
+            /*
+                System.out.println("7. Poison Dart: Deal a small percentage of damage over time.");
+                    System.out.println("8. Insanity Curse: Instantly cause your opponent to become angry.");
+                    System.out.println("9. Enlargement Flask: Gain super armor on your next attack.");
+             */
+            if (poisonDart > 0) System.out.println("7. Poison Dart");
+            if (insanityCurses > 0) System.out.println("8. Insanity Curse");
+            if (enlargementFlask > 0) System.out.println("9. Enlargement Flask");
             playerResponse();
             switch (answer) {
                 case 1 ->{
@@ -1157,7 +1170,46 @@ class Combat extends Primary {
                     }
                     else System.out.println("You did not confirm.");
                 }
-                default -> {}
+                case 7 -> {
+                      /*
+                             System.out.println("7. Poison Dart: Deal a small percentage of damage over time.");
+                    System.out.println("8. Insanity Curse: Instantly cause your opponent to become angry.");
+                    System.out.println("9. Enlargement Flask: Gain super armor on your next attack.");
+                             */
+
+                    System.out.println("You are using a poison dart. Press 1 to confirm, or press another number to change.");
+                    playerResponse();
+                    if (answer == 1) {
+                        tempMove = "Poison Dart";
+                        poisonDart -= 1;
+                        DOTDuration = 3;
+                        DOTDamage = attackDamage*0.05;
+                        executeMove(1.7, 5,10, "DOT", 0,20,0);
+                    }
+                    else System.out.println("You did not confirm.");
+                }
+                case 8 -> {
+                    System.out.println("You are using a insanity curse. Press 1 to confirm, or press another number to change.");
+                    playerResponse();
+                    if (answer == 1) {
+                        tempMove = "Insanity Curse";
+                        insanityCurses -= 1;
+                        enemyRage = 100;
+                        hasConfirmedCombat = true;
+                    }
+                    else System.out.println("You did not confirm.");
+                }
+                case 9 -> {
+                    System.out.println("You are using an enlargement flask. Press 1 to confirm, or press another number to change.");
+                    if (answer == 1) {
+                        tempMove = "Enlargement Flask";
+                        enlargementFlask -= 1;
+                        hasArmor = true;
+                        armorDuration = 2;
+                        hasConfirmedCombat = true;
+                    }
+                }
+                default -> {System.out.println("You did not confirm.");}
             }
     }
 
@@ -1194,125 +1246,135 @@ class Combat extends Primary {
          }
     }
 
-    static void swordsmanAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        //The AI is RNG with odds that change depending on fight circumstances, like hp remaining, distance, or the player's weapon.
-        enemyConfirm = false;
-        /*
-        new idea
-        i sort everything like this:
-        switch (emotion) {
-        case "Angry" -> {
-        genericRNG(1, 5)
-        }
-        then i do something like
-        if (rngVal == randomnumber)
-        {
-        all the offensive options..........
-        }
-         */
-        while (!enemyConfirm) {
-            genericRNG(1,99);
-            switch (enemyBehaviour) {
-                case "Angry" -> {
-                    if (rngVal >= 73 && rngVal <= 87) enemyWillDefend = true;
-                    else if (rngVal >= 88) enemyWillMove = true;
-                    else enemyWillAttack = true;
-                }
-                case "Fearful" -> {
-                    if (rngVal >= 64 && rngVal <= 87) enemyWillMove = true;
-                    else if (rngVal >= 88) enemyWillAttack = true;
-                    else enemyWillDefend = true;
-                }
-                case "Overconfident" -> {
-                    if (rngVal >= 69 && rngVal <= 83) enemyWillAttack = true;
-                    else if (rngVal >= 84) enemyWillDefend = true;
-                    else enemyWillMove = true;
-                }
-                case "Cautious" -> {
-                    if (rngVal >= 34 && rngVal <= 69) enemyWillDefend = true;
-                    else if (rngVal >= 70) enemyWillMove = true;
-                    else enemyWillAttack = true;
-                }
-                case "Focused" -> {
-                    genericRNG(1,2);
-                    if (rngVal == 1) enemyWillAttack = true;
-                    else if (rngVal == 2) enemyWillMove = true;
-                    else if (rngVal == 3) enemyWillDefend = true;
-                }
+    static void humanEmotion() {
+        genericRNG(1,99);
+        switch (enemyBehaviour) {
+            case "Angry" -> {
+                if (rngVal >= 73 && rngVal <= 87) moveDecider = 2;
+                else if (rngVal >= 88) moveDecider = 3;
+                else moveDecider = 1;
             }
-            if (enemyWillAttack) moveDecider = 1;
-            else if (enemyWillDefend) moveDecider = 2;
-            else if (enemyWillMove) moveDecider = 3;
+            case "Fearful" -> {
+                if (rngVal >= 64 && rngVal <= 87) moveDecider = 3;
+                else if (rngVal >= 88) moveDecider = 1;
+                else moveDecider = 3;
+            }
+            case "Overconfident" -> {
+                if (rngVal >= 69 && rngVal <= 83) moveDecider = 1;
+                else if (rngVal >= 84) moveDecider = 2;
+                else moveDecider = 3;
+            }
+            case "Cautious" -> {
+                if (rngVal >= 34 && rngVal <= 69) moveDecider = 2;
+                else if (rngVal >= 70) moveDecider = 3;
+                else moveDecider = 1;
+            }
+            case "Focused" -> {
+                genericRNG(1,2);
+                moveDecider = rngVal;
+            }
+        }
+        if (enemyWillAttack) moveDecider = 1;
+        else if (enemyWillDefend) moveDecider = 2;
+        else if (enemyWillMove) moveDecider = 3;
+    }
+
+    static void beastEmotion() {
+        switch (enemyBehaviour) {
+            case "Angry" -> {
+                if (rngVal >= 73 && rngVal <= 87) moveDecider = 2;
+                else if (rngVal >= 88) moveDecider = 3;
+                else moveDecider = 1;
+            }
+            case "Cautious" -> {
+                if (rngVal >= 34 && rngVal <= 69) moveDecider = 2;
+                else if (rngVal >= 70) moveDecider = 3;
+                else moveDecider = 1;
+            }
+        }
+    }
+
+    static void swordsmanAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+         /*
+         here's how AI works:
+         first, we get emotion
+         the emotion influences the odds of either attack, move, or defend
+         1 = attack
+         2 = defend
+         3 = move
+          then it does a 2nd rng to determine which specific move to do.
+          */
+        humanEmotion();
+        while (!enemyConfirm) {
             switch (moveDecider) {
                 case 1 -> {
                     if (enemyName.contains("Weak Swords-man")) genericRNG(1, 4);
                     else if (enemyName.contains("Strong")) genericRNG(1, 5);
-                    else genericRNG(1, 8);
+                    else genericRNG(1, 6);
                     rngbaddie = rngVal;
                     if (fightRange >= 2) {
                         if (rngbaddie == 1 || rngbaddie == 2) {
                             if (enemyStamina > 20) executeMoveEnemy("Forward Swipe",0.75, 2, 0.7, "", 0, 0, 0, 20);
                         }
-                        if (rngbaddie == 3) {
-                            enemymoveName = "Walk Forward";
-                            enemyStamina += 10;
-                        }
-                        if (rngbaddie == 4) {
+                       else if (rngbaddie == 3) enemyUniversalOptions('F');
+                       else if (rngbaddie == 4) {
                             if (enemyStamina > 25) executeMoveEnemy("Stab", 0.9, 2, 0.65, "", 0, 0, 0, 25);
                         }
-                        if (rngbaddie == 5) {
+                       else if (rngbaddie == 5) {
                             if (enemyStamina > 45) executeMoveEnemy("Whirlwind", 0.4, 3, 1.1, "", 0, 70, 0, 45);
                         }
-                        if (rngbaddie == 6 && !enemyName.contains("Weak Swords-man")) {
+                       else if (rngbaddie == 6) {
                             if (enemyStamina >= 40) executeMoveEnemy("Ki Slash", 0.7, 3, 0.6, "", 0, 0, 9, 40);
+                        }
+                       else if (rngbaddie == 7 && eSmokeBomb > 0) {
+                           tempVal = 0;
+                           enemymoveName = "Smoke Bomb";
+                           do {
+                               genericRNG(1,7);
+                               tempVal++;
+                           } while (rngVal <= fightRange || tempVal < 3);
+                            fightRange = rngVal;
+                           eSmokeBomb -= 1;
+                           enemyConfirm = true;
                         }
                     } else {
                         if (enemyName.contains("Weak Swords")) genericRNG(1, 1);
-                        else genericRNG(1, 3);
+                        else genericRNG(1, 4);
                         rngbaddie = rngVal;
-                        if (rngbaddie == 1) {
-                            enemymoveName = "Walk Forward";
-                            enemyStamina += 10;
-                            combatSoundEffect(11);
-                        } else if (rngbaddie == 2) {
+                        if (rngbaddie == 1) enemyUniversalOptions('F');
+                            else if (rngbaddie == 2) {
                             if (enemyStamina >= 45) executeMoveEnemy("Whirlwind",0.4, 3, 1.1, "", 0, 70, 0, 45);
                         }
                         else if (rngbaddie == 3 && !enemyName.contains("Weak") || rngbaddie == 4 && !enemyName.contains("Weak")) {
                             if (enemyStamina >= 40) executeMoveEnemy("Ki Slash", 0.7, 3, 0.6, "", 0, 0, 9, 40);
+                        }
+                        else if (rngbaddie == 5 && ePoisonDart > 0) {
+                            tempVal = 0;
+                            enemymoveName = "Poison Dart";
+                            ePoisonDart -= 1;
+                            enemyDOTDuration = 3;
+                            enemyDOTDamage = enemyDamage*0.05;
+                            executeMoveEnemy("Poison Dart", 1.7, 5,10, "DOT", 0,20,0, 0);
                         }
                     }
                 }
                 case 2 -> {
                     genericRNG(1,2);
                     rngbaddie = rngVal;
-                    if (rngbaddie == 1) {
-                        enemymoveName = "Walk Backwards";
-                        enemyStamina += 5;
-                    }
-                    else if (rngbaddie == 2 || rngbaddie == 3 ) {
-                        enemymoveName = "Block";
-                        enemyIsBlocking = true;
-                    }
+                    if (rngbaddie == 1) enemyUniversalOptions('B');
+                    else enemyUniversalOptions('G');
                 }
                 case 3 -> {
                     genericRNG(1,3);
                     rngbaddie = rngVal;
-                    if (rngbaddie == 1) {
-                        enemymoveName = "Walk Forward";
-                        enemyStamina += 10;
-                    }
-                    else if (rngbaddie == 2) {
-                        enemymoveName = "Walk Backwards";
-                        enemyStamina += 5;
-                    }
-                    if (rngbaddie == 3 || rngbaddie == 4) {
-                        enemymoveName = "Wait";
-                        enemyStamina += 20;
-                    }
+                    if (rngbaddie == 1) enemyUniversalOptions('F');
+                    else if (rngbaddie == 2) enemyUniversalOptions('B');
+                    else enemyUniversalOptions('W');
                 }
             }
         }
         if (enemyIsAttacking && !enemymoveName.contains("Shove") && !enemymoveName.contains("Ki Slash")) {
+            //energy sfx
             genericRNG(5,2);
             combatSoundEffect(rngVal);
         }
@@ -1320,42 +1382,13 @@ class Combat extends Primary {
 
 
     static void shieldsmanAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        genericRNG(1,99);
-        switch (enemyBehaviour) {
-            case "Angry" -> {
-                if (rngVal >= 73 && rngVal <= 87) enemyWillDefend = true;
-                else if (rngVal >= 88) enemyWillMove = true;
-                else enemyWillAttack = true;
-            }
-            case "Fearful" -> {
-                if (rngVal >= 64 && rngVal <= 87) enemyWillMove = true;
-                else if (rngVal >= 88) enemyWillAttack = true;
-                else enemyWillDefend = true;
-            }
-            case "Overconfident" -> {
-                if (rngVal >= 69 && rngVal <= 83) enemyWillAttack = true;
-                else if (rngVal >= 84) enemyWillDefend = true;
-                else enemyWillMove = true;
-            }
-            case "Cautious" -> {
-                if (rngVal >= 34 && rngVal <= 69) enemyWillDefend = true;
-                else if (rngVal >= 70) enemyWillMove = true;
-                else enemyWillAttack = true;
-            }
-            case "Focused" -> {
-                genericRNG(1,2);
-                if (rngVal == 1) enemyWillAttack = true;
-                else if (rngVal == 2) enemyWillMove = true;
-                else if (rngVal == 3) enemyWillDefend = true;
-            }
-        }
-        if (enemyWillAttack) moveDecider = 1;
-        else if (enemyWillDefend) moveDecider = 2;
-        else if (enemyWillMove) moveDecider = 3;
+        humanEmotion();
         while (!enemyConfirm) {
             switch (moveDecider) {
                 case 1 -> {
-                    genericRNG(1, 5);
+                  if (enemyName.contains("Weak"))  genericRNG(1, 3);
+                  else if (enemyName.contains("Strong")) genericRNG(1,4);
+                  else if (enemyName.contains("Ninja")) genericRNG(1,6);
                     rngbaddie = rngVal;
                     if (rngbaddie == 1 || rngbaddie == 2) {
                         if (enemyStamina >= 15) executeMoveEnemy("Bash", 0.6, 2, 0.65, "", 0, 0, 0, 15);
@@ -1363,124 +1396,87 @@ class Combat extends Primary {
                     else if (rngbaddie == 3) {
                         if (enemyStamina >= 35) executeMoveEnemy("Uppercut", 0.75, 1, 0.5, "", 0, 0, 0, 35);
                     }
-                    else if (rngbaddie == 4) {
+                    else if (rngbaddie == 4) enemyUniversalOptions('F');
+                    else if (rngbaddie == 5) {
                         if (enemyStamina >= 45) executeMoveEnemy("Grapple", 1.1, 1, 0.3, "", 0, 0, 0, 45);
                     }
-                    else if (rngbaddie == 5) {
-                        enemymoveName = "Walk Forward";
-                        enemyIsAttacking = false;
-                        enemyHasWhiffed = false;
-                        enemyStamina += 10;
-                        combatSoundEffect(11);
-                        enemyConfirm = true;
+                    else if (rngbaddie == 6 && eSmokeBomb > 0) {
+                        tempVal = 0;
+                        enemymoveName = "Smoke Bomb";
+                        do {
+                            genericRNG(1,7);
+                            tempVal++;
+                        } while (rngVal >= fightRange || tempVal < 5);
+                        fightRange = rngVal;
+                        eSmokeBomb -= 1;
+                       if (tempVal < 5) enemyConfirm = true;
+                    }
+                    else if (rngbaddie == 7 && ePoisonDart > 0) {
+                        tempVal = 0;
+                        enemymoveName = "Poison Dart";
+                        ePoisonDart -= 1;
+                        enemyDOTDuration = 3;
+                        enemyDOTDamage = enemyDamage*0.05;
+                        executeMoveEnemy("Poison Dart", 1.7, 5,10, "DOT", 0,20,0, 0);
                     }
                 }
                 case 2 -> {
-                    genericRNG(1, 2);
+                    genericRNG(1, 3);
                     rngbaddie = rngVal;
-                    if (rngbaddie == 1) {
-                        enemymoveName = "Walk Backwards";
-                        enemyIsAttacking = false;
-                        enemyHasWhiffed = false;
-                        enemyStamina += 5;
-                        enemyConfirm = true;
-                    }
-                    if (rngbaddie == 2) {
-                        enemymoveName = "Block";
-                        enemyIsAttacking = false;
-                        enemyHasWhiffed = false;
-                        enemyIsBlocking = true;
-                        enemyConfirm = true;
-                    }
+                    if (rngbaddie == 1) enemyUniversalOptions('B');
+                    if (rngbaddie == 2) enemyUniversalOptions('G');
                     else if (rngbaddie == 3) {
                         if (enemyStamina >= 25) executeMoveEnemy("Side Kick", 0.9, 3, 0.4, "Boop", 2, 30, 0, 25);
+                    }
+                    else if (rngbaddie == 4) {
+                        tempVal = 0;
+                        enemymoveName = "Smoke Bomb";
+                        do {
+                            genericRNG(1,7);
+                            tempVal++;
+                        } while (rngVal <= fightRange || tempVal < 5);
+                        fightRange = rngVal;
+                        eSmokeBomb -= 1;
+                        if (tempVal < 3) enemyConfirm = true;
                     }
                 }
                 case 3 -> {
                     genericRNG(1, 3);
                     rngbaddie = rngVal;
-                    if (rngbaddie == 1) {
-                        enemymoveName = "Walk Backwards";
-                        enemyIsAttacking = false;
-                        enemyHasWhiffed = false;
-                        enemyStamina += 5;
-                        enemyConfirm = true;
-                    }
-                    if (rngbaddie == 2) {
-                        enemymoveName = "Walk Forward";
-                        enemyIsAttacking = false;
-                        enemyHasWhiffed = false;
-                        enemyStamina += 10;
-                        combatSoundEffect(11);
-                        enemyConfirm = true;
-                    }
-                    if (rngbaddie == 3 || rngbaddie == 4) {
-                        enemymoveName = "Wait";
-                        enemyHasWhiffed = false;
-                        enemyIsAttacking = false;
-                        enemyIsBlocking = false;
-                        enemyStamina += 20;
-                        enemyConfirm = true;
-                    }
+                    if (rngbaddie == 1) enemyUniversalOptions('B');
+                    if (rngbaddie == 2) enemyUniversalOptions('F');
+                    if (rngbaddie == 3 || rngbaddie == 4) enemyUniversalOptions('W');
                 }
             }
         }
     }
     static void bowmanAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        //The AI is RNG with odds that change depending on fight circumstances, like hp remaining, distance, or the player's weapon.
-        genericRNG(1, 10);
-        rngbaddie = rngVal;
-        enemyConfirm = false;
-            genericRNG(1, 99);
-            switch (enemyBehaviour) {
-                case "Angry" -> {
-                    if (rngVal >= 73 && rngVal <= 87) enemyWillDefend = true;
-                    else if (rngVal >= 88) enemyWillMove = true;
-                    else enemyWillAttack = true;
-                }
-                case "Fearful" -> {
-                    if (rngVal >= 64 && rngVal <= 87) enemyWillMove = true;
-                    else if (rngVal >= 88) enemyWillAttack = true;
-                    else enemyWillDefend = true;
-                }
-                case "Overconfident" -> {
-                    if (rngVal >= 69 && rngVal <= 83) enemyWillAttack = true;
-                    else if (rngVal >= 84) enemyWillDefend = true;
-                    else enemyWillMove = true;
-                }
-                case "Cautious" -> {
-                    if (rngVal >= 34 && rngVal <= 69) enemyWillDefend = true;
-                    else if (rngVal >= 70) enemyWillMove = true;
-                    else enemyWillAttack = true;
-                }
-                case "Focused" -> {
-                    genericRNG(1, 2);
-                    if (rngVal == 1) enemyWillAttack = true;
-                    else if (rngVal == 2) enemyWillMove = true;
-                    else if (rngVal == 3) enemyWillDefend = true;
-                }
-            }
-            if (enemyWillAttack) moveDecider = 1;
-            else if (enemyWillDefend) moveDecider = 2;
-            else if (enemyWillMove) moveDecider = 3;
-            while (!enemyConfirm) {
-                switch (moveDecider) {
-                    case 1 -> {
-                        genericRNG(1, 2);
-                        if (rngbaddie == 1) {
-                            if (enemyStamina >= 20) executeMoveEnemy("Bow Swipe", 0.55, 2, 0.6, "", 0, 0, 0, 20);
-                        } else if (rngbaddie == 2) {
-                            if (enemyQuiver > 0) {
-                                enemyQuiver -= 1;
-                                executeMoveEnemy("Quick Shot", 0.65, 2, 0.5, "", 0, 5, 0, 0);
-                            } else {
-                                System.out.println("The enemy is out of arrows!");
-                                enemyHasWhiffed = true;
-                                enemyWhiffedturns = 2;
-                            }
-                        } else if (rngbaddie == 3) {
-                            if (enemyStamina >= 25) executeMoveEnemy("Side Kick", 0.85, 2, 0.35, "", 0, 0, 0, 25);
-                        }
+       humanEmotion();
+       while (!enemyConfirm) {
+        switch (moveDecider) {
+         case 1 -> {
+          if (enemyName.contains("Ninja")) genericRNG(1, 3);
+          else genericRNG(1,2);
+          rngbaddie = rngVal;
+           if (rngbaddie == 1) {
+           if (enemyStamina >= 20) executeMoveEnemy("Bow Swipe", 0.55, 2, 0.6, "", 0, 0, 0, 20);
+             } else if (rngbaddie == 2) {
+             if (enemyQuiver > 0) {
+              enemyQuiver -= 1;
+               executeMoveEnemy("Quick Shot", 0.65, 2, 0.5, "", 0, 5, 0, 0);
+                } else {
+                   System.out.println("The enemy is out of arrows!");
+                   enemyHasWhiffed = true;
+                   enemyWhiffedturns = 2;
+                   }
+                   } else if (rngbaddie == 3) {
+                   if (enemyStamina >= 25) executeMoveEnemy("Side Kick", 0.85, 2, 0.35, "", 0, 0, 0, 25);
+                   }
+           else if (rngbaddie == 4) {
+               DOTDuration = 1;
+               DOTDamage = enemyDamage*0.15;
+               if (enemyStamina >= 30) executeMoveEnemy("Arrow Stab", 0.6, 1,0.5,"DOT", 0, 35,0,30);
+           }
                     }
                     case 2 -> {
                         if (fightRange >= 4) {
@@ -1495,130 +1491,150 @@ class Combat extends Primary {
                                 }
                             }
                         else {
-                            genericRNG(1, 3);
+                            if (enemyName.contains("Ninja")) genericRNG(1,4);
+                            else genericRNG(1, 3);
                             rngbaddie = rngVal;
-                            if (rngbaddie == 1 || rngbaddie == 2 || rngbaddie == 3) {
-                                enemymoveName = "Walk Backwards";
-                                enemyIsAttacking = false;
-                                enemyHasWhiffed = false;
-                                enemyStamina += 5;
-                                enemyConfirm = true;
+                            if (rngbaddie == 1 || rngbaddie == 2 || rngbaddie == 3) enemyUniversalOptions('B');
+                            else if (rngbaddie == 4) {
+                                if (enemyQuiver > 0 && enemyStamina >= 40) {
+                                    enemyQuiver -= 1;
+                                    executeMoveEnemy("Retreating Shot", 0.45, 4, 0.25, "", 0, 0, 0, 40);
+                                }
                             }
-                            else {
-                                enemymoveName = "Block";
-                                enemyIsBlocking = true;
-                                enemyConfirm = true;
-                            }
+                            else enemyUniversalOptions('G');
                         }
                     }
                     case 3 -> {
                         genericRNG(1,4);
                         rngbaddie = rngVal;
-                        if (rngbaddie == 1) {
-                            enemymoveName = "Walk Forward";
-                            enemyIsAttacking = false;
-                            enemyHasWhiffed = false;
-                            enemyStamina += 10;
-                            enemyConfirm = true;
-                        }
-                        else if (rngbaddie >= 2 && rngbaddie <= 4) {
-                            enemymoveName = "Walk Backwards";
-                            enemyIsAttacking = false;
-                            enemyHasWhiffed = false;
-                            enemyStamina += 5;
-                            enemyConfirm = true;
-                        }
-                        else {
-                            enemymoveName = "Wait";
-                            enemyHasWhiffed = false;
-                            enemyIsAttacking = false;
-                            enemyIsBlocking = false;
-                            enemyStamina += 20;
-                            enemyConfirm = true;
-                        }
+                        if (rngbaddie == 1) enemyUniversalOptions('F');
+                        else if (rngbaddie >= 2 && rngbaddie <= 4) enemyUniversalOptions('B');
+                        else enemyUniversalOptions('W');
                     }
                 }
             }
         }
-    static void bearAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        //The AI is RNG with odds that change depending on fight circumstances, like hp remaining, distance, or the player's weapon.
-        switch (enemyBehaviour) {
-            case "Angry" -> {
-                if (rngVal >= 73 && rngVal <= 87) enemyWillDefend = true;
-                else if (rngVal >= 88) enemyWillMove = true;
-                else enemyWillAttack = true;
-            }
-            case "Cautious" -> {
-                if (rngVal >= 34 && rngVal <= 69) enemyWillDefend = true;
-                else if (rngVal >= 70) enemyWillMove = true;
-                else enemyWillAttack = true;
-            }
-        }
-        if (enemyWillAttack) moveDecider = 1;
-        else if (enemyWillDefend) moveDecider = 2;
-        else if (enemyWillMove) moveDecider = 3;
+    static void beastAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        beastEmotion();
         while (!enemyConfirm) {
             switch (moveDecider) {
                 case 1 -> {
-                    genericRNG(1, 7);
+                    if (enemyName.contains("Bear")) genericRNG(1, 7);
+                    else genericRNG(1, 8);
                     rngbaddie = rngVal;
                     if (fightRange <= 2) {
                         if (rngbaddie == 1 || rngbaddie == 2) {
                             if (enemyStamina >= 15) executeMoveEnemy("Claw Strike", 0.75, 2, 0.65, "", 0, 0, 0, 15);
                         }
-                        if (rngbaddie == 3) {
-                            enemymoveName = "Walk Forward";
-                            enemyStamina += 10;
-                            enemyConfirm = true;
-                        }
+                        if (rngbaddie == 3) enemyUniversalOptions('F');
                         if (rngbaddie == 4) {
                             if (enemyStamina >= 40) executeMoveEnemy("Maul", 0.8, 1, 0.7, "", 0, 45, 0, 40);
                         }
                         if (rngbaddie == 5) {
                             if (enemyStamina >= 45) executeMoveEnemy("Charge", 0.3, 3, 1.1, "", 0, 0, 0, 45);
-                        }
-                    } else {
-                        enemymoveName = "Walk Forward";
-                        enemyStamina += 10;
-                        enemyConfirm = true;
+                        } else if (rngbaddie == 9 && !isPrimal) {
+                            enemymoveName = "Primal";
+                            enemyIsAttacking = true;
+                            enemyIsBlocking = false;
+                            isPrimal = true;
+                        } else enemyUniversalOptions('F');
                     }
                 }
-                case 2 -> {
-                    genericRNG(1, 2);
-                    rngbaddie = rngVal;
-                    //I want the bear to hold its ground more even if it rolls a defensive turn.
-                    if (rngbaddie == 1) {
-                        enemymoveName = "Walk Backwards";
-                        enemyStamina += 5;
-                        enemyConfirm = true;
-                    } else {
-                        enemymoveName = "Block";
-                        enemyIsBlocking = true;
-                        enemyConfirm = true;
+                    case 2 -> {
+                        genericRNG(1, 2);
+                        rngbaddie = rngVal;
+                        //I want the bear to hold its ground more even if it rolls a defensive turn.
+                        if (rngbaddie == 1) enemyUniversalOptions('W');
+                        else enemyUniversalOptions('G');
                     }
-                }
-                case 3 -> {
-                    genericRNG(1, 3);
-                    if (rngbaddie == 1) {
-                        enemymoveName = "Walk Backwards";
-                        enemyStamina += 5;
-                        enemyConfirm = true;
-                    } else if (rngbaddie == 2) {
-                        enemymoveName = "Walk Forward";
-                        enemyStamina += 10;
-                        enemyConfirm = true;
-                    } else {
-                        enemymoveName = "Wait";
-                        enemyHasWhiffed = false;
-                        enemyIsAttacking = false;
-                        enemyIsBlocking = false;
-                        enemyStamina += 20;
-                        enemyConfirm = true;
+                    case 3 -> {
+                        genericRNG(1, 3);
+                        if (rngbaddie == 1) enemyUniversalOptions('D');
+                        else if (rngbaddie == 2) enemyUniversalOptions('F');
+                        else enemyUniversalOptions('W');
                     }
                 }
             }
         }
-    }
+        static void oniAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+            humanEmotion();
+            while (!enemyConfirm) {
+                switch (moveDecider) {
+                    case 1 -> {
+                        genericRNG(1,7);
+                        rngbaddie = rngVal;
+                        if (fightRange >= 2) {
+                            if (rngbaddie == 1 || rngbaddie == 2) {
+                                if (enemyStamina > 35) executeMoveEnemy("Spirit Slash",0.8, 3, 0.75, "", 0, 0, 0, 35);
+                            }
+                            else if (rngbaddie == 3) enemyUniversalOptions('F');
+                            else if (rngbaddie == 4) {
+                                if (enemyStamina > 25) executeMoveEnemy("Lacerate", 0.6, 2, 0.65, "", 0, 0, 0, 25);
+                            }
+                            else if (rngbaddie == 5) {
+                                if (enemyStamina > 45) executeMoveEnemy("Soul Snatch", 0.1, 4, 0.4, "DOT, Suck", 0, 70, 0, 45);
+                            }
+                            else if (rngbaddie == 6) {
+                                if (enemyStamina > 60) executeMoveEnemy("Ki Stab", 0.9, 1, 0.85, "", 0, 0, 9, 60);
+                            }
+                            else if (rngbaddie == 7 && eSmokeBomb > 0) {
+                                tempVal = 0;
+                                enemymoveName = "Smoke Bomb";
+                                do {
+                                    genericRNG(1,7);
+                                    tempVal++;
+                                } while (rngVal >= fightRange || tempVal < 5);
+                                fightRange = rngVal;
+                                eSmokeBomb -= 1;
+                                if (tempVal < 5) enemyConfirm = true;
+                            }
+                        } else {
+                             genericRNG(1, 4);
+                            rngbaddie = rngVal;
+                            if (rngbaddie == 1) enemyUniversalOptions('F');
+                            else if (rngbaddie == 2) {
+                                if (enemyStamina > 45) executeMoveEnemy("Soul Snatch",0.4, 3, 1.1, "", 0, 70, 0, 45);
+                            }
+                            else if (rngbaddie == 3 && !enemyName.contains("Weak") || rngbaddie == 4 && !enemyName.contains("Weak")) {
+                                if (enemyStamina > 40) executeMoveEnemy("Ki Slash", 0.7, 3, 0.6, "", 0, 0, 9, 40);
+                            }
+                            else if (rngbaddie == 5 && eSmokeBomb > 0) {
+                                tempVal = 0;
+                                enemymoveName = "Smoke Bomb";
+                                do {
+                                    genericRNG(1,7);
+                                    tempVal++;
+                                } while (rngVal <= fightRange || tempVal < 5);
+                                fightRange = rngVal;
+                                eSmokeBomb -= 1;
+                               if (tempVal < 5) enemyConfirm = true;
+                            }
+                        }
+                    }
+                    case 2 -> {
+                        genericRNG(1,3);
+                        rngbaddie = rngVal;
+                        if (rngbaddie == 1) enemyUniversalOptions('B');
+                        else if (rngbaddie == 2 || rngbaddie == 3) {
+                                if (enemyStamina > 10) executeMoveEnemy("Shuriken",0.7/fightRange, 6,0.1,"",0,0,0,10);
+                            }
+                        else enemyUniversalOptions('G');
+                    }
+                    case 3 -> {
+                        genericRNG(1,3);
+                        rngbaddie = rngVal;
+                        if (rngbaddie == 1) enemyUniversalOptions('F');
+                        else if (rngbaddie == 2) enemyUniversalOptions('B');
+                        else enemyUniversalOptions('W');
+                    }
+                }
+            }
+            if (enemyIsAttacking && !enemymoveName.contains("Shove") && !enemymoveName.contains("Ki Slash")) {
+                //energy sfx
+                genericRNG(5,2);
+                combatSoundEffect(rngVal);
+            }
+        }
     protected static void combatRecap() {
         if (playerHP <= 0) {
             System.out.println("You were defeated.");
@@ -1633,7 +1649,7 @@ class Combat extends Primary {
             System.out.println("You gained " + (coin - tempVal) + " coins!");
             tempVal = playerexp;
             //Getting exp based on the opponent's power may be too inconsistent of a growth right now...
-            genericRNG((int) (enemyPower/1.5), (int) (enemyPower));
+            genericRNG((int) (enemyPower/2), (int) (enemyPower));
             playerexp += rngVal;
             System.out.println("You gained " + (playerexp - tempVal) + " experience!");
             //enemy goes to the shadow realm (aka the negative spots I put everything)
@@ -1682,11 +1698,13 @@ class Combat extends Primary {
                 if (moveSet.containsValue("2")) {
                     tempVal = enemyHP;
                     moveDamage = (attackDamage * 0.45) * (100 / (100 + enemyDefense));
+                    if (enemyIsBlocking) moveDamage = moveDamage / 4;
                     enemyHP -= moveDamage;
                     System.out.println("The opponent was hit for " + (tempVal - enemyHP) + "by the Pyroslash!");
                 }
                 CC += "DOT";
-                ccAmount += 1;
+                DOTDamage = Math.toIntExact(Math.round((attackDamage*0.25) * (100/(100 + enemyDefense))));
+                DOTDuration = 2;
                 enemyStruck = true;
             }
         }
@@ -1703,19 +1721,27 @@ class Combat extends Primary {
         //Axe stuff, installs do a lot
         if (eradicateTurns > 0) {
             isIgnited = true;
+            DOTDamage = attackDamage*0.15;
             //If your move already has DOT, you also get a stun. This might be broken tho............. but at the same time i haven't actually used a super as of May 25, 2023 lol.
             if (CC.contains("DOT")) CC += "Stun";
             hasArmor = true;
+            armorDuration = 2;
+        }
+        //Attack dog buff (makes next move have bleed/DOT effect)
+        if (isPrimal){
+            enemyCC += "DOT";
+            enemyDOTDamage += attackDamage*0.07;
+            enemyDOTDuration = 2;
         }
         //Movement options
         //If your option moves you, it should be underneath
         switch (moveName) {
             case "Walk Backwards", "Retreating Strike" -> fightRange += 1;
-            case "Walk Forwards" -> fightRange -= 1;
+            case "Walk Forward" -> fightRange -= 1;
             default -> {}
         }
         switch (enemymoveName) {
-            case "Walk Backwards" -> fightRange += 1;
+            case "Walk Backwards", "Retreating Shot" -> fightRange += 1;
             case "Walk Forward", "Charge" -> fightRange -= 1;
             default -> {}
         }
@@ -1729,8 +1755,7 @@ class Combat extends Primary {
         //The if statement is to check if the flag is true.
         if (hasGrapplingHook) {
             moveRange += 1;
-            tempVal = moveSpeed / 5;
-            moveSpeed -= tempVal;
+            moveSpeed -= moveSpeed/5;
         }
         if (moveRange < fightRange && playerIsAttacking) {
                 System.out.println("You whiffed!");
@@ -1743,7 +1768,7 @@ class Combat extends Primary {
             enemyHasWhiffed = true;
             enemyWhiffedturns = enemymoveRange;
             enemyIsAttacking = false;
-            //If the opponent whiffs, I want them to either play more defensivly or double down
+            //If the opponent whiffs, I want them to either play more defensively or double down
             genericRNG(5,10);
             tempVal = rngVal;
             genericRNG(1,1);
@@ -1826,25 +1851,23 @@ class Combat extends Primary {
 
         //  if (enemyStruck) playerStruck = false;
 
+        if (playerStruck && hasArmor && armorDuration > 0 && !playerHasWhiffed && playerIsAttacking) enemyStruck = true;
         if (enemyStruck && !playerHasWhiffed) {
             if (enemyName.contains("Weak")) {
                 genericRNG(1,2);
-                switch (rngVal) {
-                    case 1 -> {
-                        genericRNG(10, 30);
-                        enemyRage += rngVal;
-                        tempVal = rngVal;
-                        genericRNG(1,1);
-                        if (rngVal == 1) enemyFear -= rngVal;
-                        else enemyEgo -= rngVal;
-                    }
-                    default -> {
-                        genericRNG(10, 30);
-                        enemyFear += rngVal;
-                        genericRNG(1,1);
-                        if (rngVal == 1) enemyEgo -= rngVal;
-                        else enemyRage -= rngVal;
-                    }
+                if (rngVal == 1) {
+                    genericRNG(10, 30);
+                    enemyRage += rngVal;
+                    tempVal = rngVal;
+                    genericRNG(1, 1);
+                    if (rngVal == 1) enemyFear -= rngVal;
+                    else enemyEgo -= rngVal;
+                } else {
+                    genericRNG(10, 30);
+                    enemyFear += rngVal;
+                    genericRNG(1, 1);
+                    if (rngVal == 1) enemyEgo -= rngVal;
+                    else enemyRage -= rngVal;
                 }
             }
             //Sword sfx
@@ -1888,13 +1911,13 @@ class Combat extends Primary {
                 } else System.out.println("You cannot re-stun the opponent.");
             } else if (CC.contains("Weaken Damage") || CC.contains("Weaken Speed")) {
                 System.out.println("You weakened the the opponent!");
-                if (CC.contains("Weaken Damage")) enemyDamage = enemyDamage * ((double) 100 / (100 * ccAmount));
-                if (CC.contains("Weaken Speed")) enemySpeed = enemySpeed * ((double) 100 / (100 * ccAmount));
+                if (CC.contains("Weaken Damage")) enemyDamage *= ((double) 100 / (100 * ccAmount));
+                if (CC.contains("Weaken Speed")) enemySpeed *= ((double) 100 / (100 * ccAmount));
             }
-            if (CC.contains("DOT" /* stands for Damage over Time */)) {
+            else if (CC.contains("DOT")) enemyTakesDOT = true;
+            if (DOTDuration > 0 && enemyTakesDOT) {
                 tempVal2 = enemyHP;
-                tempVal = moveDamage / 4;
-                enemyHP -= tempVal;
+                enemyHP -= DOTDamage;
                 System.out.println("You did a bonus " + (tempVal2 - enemyHP) + " damage!");
                 if (moveSet.containsValue("Ignite 2") && isIgnited) {
                     tempVal = playerHP;
@@ -1906,35 +1929,31 @@ class Combat extends Primary {
                 //lets the player know that they landed the sweet spot
             superMeter += Math.round(moveDamage / 2.5);
             //Super meter builds with damage
-            if (superMeter >= 100) hasSuper = true;
-            else hasSuper = false;
+            hasSuper = superMeter >= 100;
             // this is the Sword Mastery Perk (Sword charges gives charge on sweetspot hits)
             if (weaponName.contains("Sword") && masteredWeapon && hitTipper) swordCharged = true;
             if (moveName.contains("Cripple 2")) staminaRegenPaused = ccAmount;
         }
         if (playerStruck) {
-            genericRNG(10, 30);
+            genericRNG(10, 20);
             enemyEgo += rngVal;
-            genericRNG(1,1);
+            genericRNG(1, 1);
             if (rngVal == 1) enemyRage -= rngVal;
             else enemyFear -= rngVal;
-
             if (enemyName.contains("Sword") && !enemymoveName.contains("Block")) {
                 //hit sfx
                 if (swordCharged) combatSoundEffect(10);
                 else combatSoundEffect(8);
             }
             //Deflect is a counter, so we check if they got hit 
-            if (moveName.contains("Deflect"))
-            {
+            if (moveName.contains("Deflect")) {
                 enemyStamina = 0;
                 if (moveName.contains("2")) {
-                    moveDamage = enemymoveDamage*0.25 * (100 /(100 + enemyDefense));
+                    moveDamage = enemymoveDamage * 0.25 * (100 / (100 + enemyDefense));
                     enemyHP -= moveDamage;
                 }
                 System.out.println("You reflected the opponent's attack!");
-            }
-            else {
+            } else {
                 if (playerIsAttacking) enemycounterHit = true;
                 //same for enemies
                 if (enemycounterHit) playerStamina -= 20;
@@ -1958,45 +1977,52 @@ class Combat extends Primary {
                         unactionableTurns = ccAmount;
                     }
                 }
-                    if (enemyCC.contains("Weaken Damage") || enemyCC.contains("Weaken Speed")) {
-                        System.out.println("The enemy weakened you!");
-                        if (CC.contains("Weaken Damage")) attackDamage = attackDamage * ((double) 100 / (100 * ccAmount));
-                        if (CC.contains("Weaken Speed")) attackSpeed = attackSpeed * ((double) 100 / (100 * ccAmount));
-                    }
+                if (enemyCC.contains("Weaken Damage") || enemyCC.contains("Weaken Speed")) {
+                    System.out.println("The enemy weakened you!");
+                    if (CC.contains("Weaken Damage")) attackDamage = attackDamage * ((double) 100 / (100 * ccAmount));
+                    if (CC.contains("Weaken Speed")) attackSpeed = attackSpeed * ((double) 100 / (100 * ccAmount));
+                }
+                if (enemyCC.contains("DOT")) playerTakesDOT = true;
+                if (enemyDOTDuration > 0 && playerTakesDOT) {
+                    tempVal2 = playerHP;
+                    playerHP -= enemyDOTDamage;
+                    System.out.println("You took a bonus " + (tempVal2 - playerHP) + " damage!");
                 }
             }
+        }
         /*
         if either the player or the enemy ran out of stamina, they should
         be stunned for a turn.
          */
-        if (enemyStamina <= 0)
-        {
+        if (enemyStamina <= 0) {
             System.out.println("The enemy's stamina has been depleted!");
             enemyStamina = 0;
             enemyIsActionable = false;
             enemyUnactionableTurns += 2;
         }
-        if (playerStamina <= 0 && playerIsActionable)
-        {
+        if (playerStamina <= 0 && playerIsActionable) {
             System.out.println("Your stamina has been depleted!");
             playerStamina = 0;
             playerIsActionable = false;
             unactionableTurns += 2;
         }
         playerStamina += 10;
+        for (int u = enemyStamina; u == 100; u++) {
+            enemyFear += 1;
+        }
         enemyStamina += 10;
         if (playerIsAttacking && swordCharged) swordCharged = false;
         }
     static void resetCombatVar() {
         clearConsole();
         //for stamina
+        armorDuration -= 1;
+        DOTDuration -= 1;
         if (enemyEgo <= 0) enemyEgo = 0;
         if (enemyFear <= 0) enemyFear = 0;
         if (enemyRage <= 0) enemyRage = 0;
-        if ((enemyRage + enemyFear + enemySpeed) > 100) {
-            enemyEmotion();
+        if ((enemyRage + enemyFear + enemySpeed) > 100) enemyEmotion();
             //This is to reset it to a preset number in case it goes past 100.
-        }
         unactionableTurns -= 1;
         enemyUnactionableTurns -= 1;
         if (unactionableTurns <= 0) {
@@ -2016,13 +2042,11 @@ class Combat extends Primary {
         //for whiffs
         enemyWhiffedturns -= 1;
         playerWhiffedturns -= 1;
-        if (enemyWhiffedturns <= 0)
-        {
+        if (enemyWhiffedturns <= 0) {
             enemyWhiffedturns = 0;
             enemyHasWhiffed = false;
         }
-        if (playerWhiffedturns <= 0)
-        {
+        if (playerWhiffedturns <= 0) {
             playerWhiffedturns = 0;
             playerHasWhiffed = false;
         }
@@ -2033,9 +2057,7 @@ class Combat extends Primary {
         moveName = "";
         moveDamage = 0;
         moveSpeed = 0;
-        if (!hasGrapplingHook) {
-            moveRange = 0;
-        }
+        if (!hasGrapplingHook) moveRange = 0;
         //can't go above 100 since its supposed to be a percentage
         if (playerStamina > 100) playerStamina = 100;
         if (enemyStamina > 100) enemyStamina = 100;
@@ -2051,7 +2073,6 @@ class Combat extends Primary {
         playercounterHit = false;
         enemycounterHit = false;
         hasConfirmed = false;
-        usedPyroslash = false;
         ignoresBlock = false;
         enemyStaminaDamage = 0;
         staminaDamage = 0;
@@ -2062,14 +2083,13 @@ class Combat extends Primary {
         enemyCC = "";
         enemyCCAmount = 0;
     }
-
     static void finalBattle() throws InterruptedException {
         System.out.println("100 days are up...");
         Thread.sleep(1000);
         System.out.println("Thousands of people entered... only 2 remain.");
         Thread.sleep(1000);
         //Determines the boss's starting stance.
-        genericRNG(1,3);
+        genericRNG(1,2);
         if (rngVal == 1) {
             bossStance = "sword";
             enemyType = "Melee Human";
@@ -2081,17 +2101,11 @@ class Combat extends Primary {
         else {
             enemyType = "Range Human";
             bossStance = "bow";
-            enemyQuiver = 7;
+            enemyQuiver = 5;
         }
         System.out.println("The enemy is using their " + bossStance + "!");
         isBoss = true;
-        enemyHP = 1000;
-        genericRNG(1250,150);
-        enemyDamage = rngVal;
-        genericRNG(950,100);
-        enemySpeed = rngVal;
-        genericRNG(1050,100);
-        enemyDefense = rngVal;
+        enemyStatSelector(120,150,1000,950,100,1050,100);
         enemyPower = (enemyHP + enemyDamage + enemySpeed + enemyDefense)/4;
         enemyName = "The Last";
         System.out.println("Your power: " + Math.round(playerPower));
@@ -2100,7 +2114,7 @@ class Combat extends Primary {
         System.out.println("CLAIM YOUR PRIZE");
         System.out.println("-----------------------------------------------------------");
     }
-    static void BossAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    static void BossAI() throws UnsupportedAudioFileException, LineUnavailableException, IOException, InterruptedException {
         if (enemyHP <= 750 && enemyHP >= 500 && bossHasSwapped == 0|| enemyHP <= 300 && bossHasSwapped == 1) {
             answerType = bossStance;
             while (answerType.equals(bossStance)) {
